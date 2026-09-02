@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اخْتِبَارٌ تَفَاعُلِيّ - دَرْسُ الصَّدَاقَةِ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* Theme colors - Indigo and Warm Amber representing Trust and Friendship */
+            --primary: #312e81; /* Indigo 900 */
+            --secondary: #f59e0b; /* Amber 500 */
+            --white: #ffffff;
+            --green: #10b981; /* Emerald 500 */
+            --red: #ef4444; /* Red 500 */
+            --dark-bg: #1e1b4b; /* Very Dark Indigo */
+            --text-dark: #0f172a; /* Slate 900 */
+            --black-bg: #0a0f24; /* Deep Night Blue */
+            --accent: #fcd34d; /* Amber 300 */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--black-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #app-container {
+            background-color: var(--primary);
+            color: var(--white);
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 Aspect Ratio */
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 12px;
+            background-image: radial-gradient(circle at top right, rgba(245, 158, 11, 0.15), transparent 65%);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 4vh 5vw;
+            box-sizing: border-box;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .start-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .icon-large {
+            width: 18vh;
+            height: 18vh;
+            margin-bottom: 2vh;
+            stroke: var(--secondary);
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        h1 {
+            font-size: 6.5vh;
+            color: var(--secondary);
+            margin: 0 0 2vh 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 4.5vh;
+            margin-bottom: 6vh;
+            font-weight: bold;
+            line-height: 1.5;
+            color: var(--accent);
+        }
+
+        .btn-large {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 5vh;
+            font-weight: bold;
+            padding: 2vh 6vw;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn-large:active {
+            transform: scale(0.95);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 3vh;
+            font-weight: bold;
+            margin-bottom: 2vh;
+            color: var(--secondary);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 2.5vh;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 4vh;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 5.5vh;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4vh;
+            line-height: 1.5;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vh;
+            margin-bottom: 4vh;
+        }
+
+        .option-btn {
+            background-color: var(--white);
+            color: var(--text-dark);
+            font-size: 4vh;
+            font-weight: bold;
+            padding: 3vh 2vw;
+            border: 5px solid var(--white);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+            line-height: 1.4;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .option-btn.correct {
+            background-color: var(--green);
+            color: var(--white);
+            border-color: var(--green);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        .feedback-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0,0,0,0.5);
+            padding: 2.5vh 3vw;
+            border-radius: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-message {
+            font-size: 4.5vh;
+            font-weight: bold;
+            margin-bottom: 1.5vh;
+        }
+
+        .feedback-explanation {
+            font-size: 3.5vh;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 2.5vh;
+            line-height: 1.5;
+        }
+
+        .btn-next {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 4vh;
+            font-weight: bold;
+            padding: 1.5vh 5vw;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-circle {
+            width: 32vh;
+            height: 32vh;
+            border: 1.5vh solid var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4vh;
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .score-text {
+            font-size: 8.5vh;
+            font-weight: bold;
+            color: var(--white);
+        }
+
+        .percentage-text {
+            font-size: 4.5vh;
+            color: var(--secondary);
+        }
+
+        .evaluation-text {
+            font-size: 6.5vh;
+            font-weight: bold;
+            margin-bottom: 6vh;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 4vw;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 4px solid var(--secondary);
+            font-size: 4.5vh;
+            font-weight: bold;
+            padding: 2vh 4vw;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3vh;
+            padding-bottom: 2vh;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .review-title {
+            font-size: 5.5vh;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .review-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 2vw;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5vh;
+        }
+
+        .review-list::-webkit-scrollbar { width: 1.2vw; }
+        .review-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .review-list::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+
+        .review-item {
+            background-color: rgba(0,0,0,0.3);
+            padding: 3.5vh;
+            border-radius: 15px;
+            border-right: 1.5vw solid var(--secondary);
+        }
+
+        .review-q {
+            font-size: 4vh;
+            font-weight: bold;
+            margin-bottom: 2vh;
+            line-height: 1.5;
+        }
+
+        .review-ans {
+            font-size: 3.5vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            line-height: 1.4;
+        }
+
+        .text-green { color: var(--green); font-weight: bold;}
+        .text-red { color: var(--red); font-weight: bold;}
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+
+    <div id="screen-start" class="screen active">
+        <div class="start-content">
+            <!-- Icon representing Friendship/Connection -->
+            <svg class="icon-large" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="9" cy="7" r="4" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <h1>لُغَةٌ عَرَبِيَّةٌ - الصَّفُّ الثَّالِثُ الْإِعْدَادِيُّ</h1>
+            <div class="subtitle">نَصُّ قِرَاءَةٍ: الصَّدَاقَةُ (لِلدُّكْتُورِ شَوْقِي ضَيْفٍ)<br> اخْتِبَارٌ تَفَاعُلِيٌّ شَامِلٌ (٣٠ سُؤَالًا)</div>
+            <button class="btn-large" onclick="startQuiz()">اِبْدَأِ الِاخْتِبَارَ</button>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="top-bar">
+            <div id="progress-text">السُّؤَالُ ١ / ٣٠</div>
+            <div id="progress-percent">٠٪</div>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="question-text" class="question-text">نَصُّ السُّؤَالِ يَظْهَرُ هُنَا؟</div>
+
+        <div id="options-container" class="options-grid">
+            <!-- Options dynamically injected -->
+        </div>
+
+        <div id="feedback-container" class="feedback-container">
+            <div id="feedback-message" class="feedback-message"></div>
+            <div id="feedback-explanation" class="feedback-explanation"></div>
+            <button id="btn-next" class="btn-next" onclick="nextQuestion()">السُّؤَالُ التَّالِي</button>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-container">
+            <h1 style="font-size: 7vh; margin-bottom: 4vh;">نَتِيجَةُ الِاخْتِبَارِ</h1>
+            <div class="score-circle">
+                <div id="score-text" class="score-text">٣٠/٣٠</div>
+                <div id="percentage-text" class="percentage-text">١٠٠٪</div>
+            </div>
+            <div id="evaluation-text" class="evaluation-text" style="color: var(--secondary);">مُمْتَازٌ!</div>
+            
+            <div class="result-buttons">
+                <button class="btn-secondary" onclick="showReview()">مُرَاجَعَةُ الإِجَابَاتِ</button>
+                <button class="btn-large" style="font-size: 4.5vh; padding: 2vh 4vw;" onclick="restartQuiz()">إِعَادَةُ الِاخْتِبَارِ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-review" class="screen">
+        <div class="review-header">
+            <h2 class="review-title">مُرَاجَعَةُ الإِجَابَاتِ</h2>
+            <button class="btn-next" onclick="showScreen('screen-result')">عَوْدَةٌ لِلنَّتِيجَةِ</button>
+        </div>
+        <div id="review-list" class="review-list">
+            <!-- Review items injected here -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 30 Questions strictly derived from "الصداقة" lesson by Shawqi Deif
+    const allQuestions = [
+        { 
+            q: "مَنْ هُوَ مُؤَلِّفُ نَصِّ «الصَّدَاقَةِ» الْمُقَرَّرِ دِرَاسَتُهُ؟", 
+            options: ["الدُّكْتُورُ شَوْقِي ضَيْفٍ", "الْأَدِيبُ نَجِيبُ مَحْفُوظٍ", "الشَّاعِرُ أَحْمَدُ شَوْقِي", "الْكَاتِبُ الْمَنْفَلُوطِيُّ"], 
+            answer: "الدُّكْتُورُ شَوْقِي ضَيْفٍ", 
+            exp: "مُؤَلِّفُ نَصِّ «الصَّدَاقَةِ» هُوَ الْكَاتِبُ وَاللُّغَوِيُّ الْمِصْرِيُّ الدُّكْتُورُ شَوْقِي ضَيْفٍ." 
+        },
+        { 
+            q: "أَيْنَ نُشِرَ مَقَالُ «الصَّدَاقَةِ» لِلدُّكْتُورِ شَوْقِي ضَيْفٍ كَمَا وَرَدَ فِي مَصْدَرِ الدَّرْسِ؟", 
+            options: ["مَجَلَّةِ الْهِلَالِ", "جَرِيدَةِ الْأَهْرَامِ", "مَجَلَّةِ الرِّسَالَةِ", "صَحِيفَةِ الْوَقَائِعِ"], 
+            answer: "مَجَلَّةِ الْهِلَالِ", 
+            exp: "نُشِرَ الْمَقَالُ فِي مَجَلَّةِ «الْهِلَالِ» الْعَدَدِ 10 بِمِصْرَ." 
+        },
+        { 
+            q: "مَا الْمَنْصِبُ الْهَامُّ الَّذِي تَوَلَّاهُ الدُّكْتُورُ شَوْقِي ضَيْفٍ كَمَا جَاءَ بِالتَّعْرِيفِ بِهِ؟", 
+            options: ["رِئَاسَةُ مَجْمَعِ اللُّغَةِ الْعَرَبِيَّةِ", "رِئَاسَةُ مَجْلِسِ الشُّيُوخِ", "إِدَارَةُ جَامِعَةِ الْقَاهِرَةِ", "رِئَاسَةُ الْهَيْئَةِ لِلْكِتَابِ"], 
+            answer: "رِئَاسَةُ مَجْمَعِ اللُّغَةِ الْعَرَبِيَّةِ", 
+            exp: "تَوَلَّى الدُّكْتُورُ شَوْقِي ضَيْفٍ رِئَاسَةَ مَجْمَعِ اللُّغَةِ الْعَرَبِيَّةِ (مَجْمَعِ الْخَالِدِينَ)." 
+        },
+        { 
+            q: "مَاذَا تَعْنِي كَلِمَةُ «حَصِيفًا» فِي قَوْلِهِ: «مَهْمَا كَانَ الْإِنْسَانُ حَصِيفًا فِي رَأْيِهِ»؟", 
+            options: ["مُتَعَقِّلًا وَحَكِيمًا", "مُتَسَرِّعًا وَطَائِشًا", "جَرِيئًا وَشُجَاعًا", "قَوِيًّا وَصَلْبًا"], 
+            answer: "مُتَعَقِّلًا وَحَكِيمًا", 
+            exp: "كَلِمَةُ «حَصِيفًا» تَعْنِي الْحَكِيمَ السَّدِيدَ الرَّأْيِ وَالْمُتَعَقِّلَ فِي الْأُمُورِ." 
+        },
+        { 
+            q: "مَا مُضَادُّ كَلِمَةِ «أَسْدَوْهَا» فِي قَوْلِهِ: «أَسْدَوْهَا إِلَيْهِ»؟", 
+            options: ["مَنَعُوهَا وَبَخِلُوا بِهَا", "قَدَّمُوهَا وَأَعْطَوْهَا", "نَسُوهَا وَتَجَاهَلُوهَا", "أَخْفَوْهَا عَنْهُ"], 
+            answer: "مَنَعُوهَا وَبَخِلُوا بِهَا", 
+            exp: "«أَسْدَوْهَا» تَعْنِي (قَدَّمُوهَا وَأَعْطَوْهَا)، وَبِالتَّالِي فَمُضَادُّهَا هُوَ: مَنَعُوهَا وَبَخِلُوا بِهَا." 
+        },
+        { 
+            q: "مَا مُفْرَدُ كَلِمَةِ «خُلَصَائِهِ» הَّتِي ذُكِرَتْ فِي الدَّرْسِ؟", 
+            options: ["الْخَلِيصُ", "الْخَالِصُ", "الْخَلِيلُ", "الْخُلُقُ"], 
+            answer: "الْخَلِيصُ", 
+            exp: "خُلَصَاءُ جَمْعٌ لِكَلِمَةِ (الْخَلِيصُ) وَهُمُ الْأَصْدِقَاءُ الْمُخْلِصُونَ الْمُقَرَّبُونَ." 
+        },
+        { 
+            q: "مَا مُرَادِفُ كَلِمَةِ «يُسْعِفُكَ» فِي قَوْلِهِ: «مَنْ يُسْعِفُكَ فِي الشِّدَّةِ»؟", 
+            options: ["يُغِيثُكَ وَيُنْجِدُكَ", "يُرْضِيكَ وَيُسَامِحُكَ", "يُشَجِّعُكَ وَيَمْدَحُكَ", "يَتَخَلَّى عَنْكَ"], 
+            answer: "يُغِيثُكَ وَيُنْجِدُكَ", 
+            exp: "يُسْعِفُكَ أَيْ: يُقَدِّمُ لَكَ الْمُسَاعَدَةَ السَّرِيعَةَ وَيُغِيثُكَ وَيُنْجِدُكَ فِي وَقْتِ الْحَاجَةِ." 
+        },
+        { 
+            q: "مَا مُضَادُّ كَلِمَةِ «الْعُسْرَةِ» فِي النَّصِّ؟", 
+            options: ["الْيُسْرُ وَالرَّخَاءُ", "الْقُوَّةُ وَالْعَظَمَةُ", "الْهِدَايَةُ وَالرُّشْدُ", "التَّفَاؤُلُ وَالْأَمَلُ"], 
+            answer: "الْيُسْرُ وَالرَّخَاءُ", 
+            exp: "الْعُسْرَةُ تَعْنِي الشِّدَّةَ وَالضِّيقَ، فَيَكُونُ مُضَادُّهَا الْيُسْرَ وَالرَّخَاءَ." 
+        },
+        { 
+            q: "كَيْفَ يَتَعَامَلُ الصَّدِيقُ مَعَ مَشَاعِرِ صَدِيقِهِ عِنْدَ اللِّقَاءِ كَمَا يَرَى الْكَاتِبُ؟", 
+            options: ["يَلْقَاهُ بَاشًّا فِي وَجْهِهِ وَيُعَامِلُهُ بِالرِّفْقِ", "يُحَدِّثُهُ بِجِدِّيَّةٍ قَاسِيَةٍ دَائِمًا", "يَتَجَاهَلُ زَلَّاتِهِ بِشَكْلٍ تَامٍّ", "يُكْثِرُ مِنْ مُعَاتَبَتِهِ لِتَوْجِيهِهِ"], 
+            answer: "يَلْقَاهُ بَاشًّا فِي وَجْهِهِ وَيُعَامِلُهُ بِالرِّفْقِ", 
+            exp: "ذَكَرَ النَّصُّ أَنَّهُ يَنْبَغِي أَنْ يُحَافِظَ عَلَى مَشَاعِرِهِ؛ فَيَلْقَاهُ دَائِمًا بَاشًّا وَيُعَامِلُهُ بِمُنْتَهَى الرِّفْقِ." 
+        },
+        { 
+            q: "مَا مَعْنَى كَلِمَةِ «مِرَاءٍ» فِي قَوْلِهِ: «وَلَا يَدْخُلُ مَعَهُ فِي مِرَاءٍ»؟", 
+            options: ["جِدَالٍ وَخِلَافٍ", "مَشَقَّةٍ وَتَعَبٍ", "مُسَايَرَةٍ وَنِفَاقٍ", "صَمْتٍ وَتَجَاهُلٍ"], 
+            answer: "جِدَالٍ وَخِلَافٍ", 
+            exp: "الْمِرَاءُ هُوَ الْجِدَالُ، أَوِ الْخِلَافُ الَّذِي قَدْ يُفْسِدُ الصَّدَاقَةَ." 
+        },
+        { 
+            q: "عَلَامَ تَقُومُ الصَّدَاقَةُ الصَّحِيحَةُ كَمَا أَكَّدَ الْكَاتِبُ فِي مَقَالِهِ؟", 
+            options: ["عَلَى الْإِيثَارِ دُونَ انْتِظَارِ مُكَافَأَةٍ", "عَلَى تَبَادُلِ الْهَدَايَا الثَّمِينَةِ", "عَلَى الْمَنْفَعَةِ الْمُتَبَادَلَةِ", "عَلَى كَثْرَةِ الْكَلِمَاتِ الْمَعْسُولَةِ"], 
+            answer: "عَلَى الْإِيثَارِ دُونَ انْتِظَارِ مُكَافَأَةٍ", 
+            exp: "وَرَدَ فِي النَّصِّ أَنَّ الصَّدَاقَةَ الصَّحِيحَةَ تَقُومُ عَلَى الْإِيثَارِ، وَتَقَبُّلِ مَيْسُورِ الْوُدِّ دُونَ أَيِّ مَشَقَّةٍ." 
+        },
+        { 
+            q: "مَا مُضَادُّ كَلِمَةِ «الْإِيثَارِ»؟", 
+            options: ["الْأَثَرَةُ وَالْأَنَانِيَّةُ", "التَّخَاذُلُ وَالتَّرَاجُعُ", "الْجُحُودُ وَالنُّكْرَانُ", "الْغَدْرُ وَالْخِيَانَةُ"], 
+            answer: "الْأَثَرَةُ وَالْأَنَانِيَّةُ", 
+            exp: "الْإِيثَارُ هُوَ تَفْضِيلُ غَيْرِكَ عَلَى نَفْسِكَ، وَعَكْسُهَا الْأَنَانِيَّةُ أَوِ (الْأَثَرَةُ)." 
+        },
+        { 
+            q: "عَلَاقَةُ قَوْلِهِ: «لِأَنَّ الصَّدَاقَةَ الصَّحِيحَةَ تَقُومُ عَلَى الْإِيثَارِ» بِمَا قَبْلَهَا هِيَ:", 
+            options: ["تَعْلِيلٌ", "نَتِيجَةٌ", "إِجْمَالٌ", "تَوْضِيحٌ"], 
+            answer: "تَعْلِيلٌ", 
+            exp: "تُبَيِّنُ السَّبَبَ الَّذِي مِنْ أَجْلِهِ لَا يَجِبُ عَلَى الصَّدِيقِ أَنْ يَمُنَّ بِأَفْضَالِهِ أَوْ يُطَالِبَ بِالْمُكَافَأَةِ." 
+        },
+        { 
+            q: "لِمَاذَا نَصَحَ الْكَاتِبُ بِالتَّرَوِّي وَالتَّثَبُّتِ فِي اخْتِيَارِ الْأَصْدِقَاءِ؟", 
+            options: ["خَشْيَةَ الزَّلَلِ وَالْوُقُوعِ فِيمَنْ لَا يَسْتَحِقُّونَ", "لِأَنَّ الْأَصْدِقَاءَ قَلِيلُونَ فِي هَذَا الزَّمَانِ", "لِلْبَحْثِ عَنِ الْمَنَافِعِ الْمَادِّيَّةِ الْخَاصَّةِ", "لِكَيْ يَبْتَعِدَ عَنْ مُشْكِلَاتِهِمْ لَاحِقًا"], 
+            answer: "خَشْيَةَ الزَّلَلِ وَالْوُقُوعِ فِيمَنْ لَا يَسْتَحِقُّونَ", 
+            exp: "ذُكِرَتْ صَرَاحَةً فِي النَّصِّ: (وَلَا بُدَّ مِنَ التَّرَوِّي.. خَشْيَةَ الزَّلَلِ وَالْوُقُوعِ فِيمَنْ لَا يَسْتَحِقُّونَ صَدَاقَتَكَ)." 
+        },
+        { 
+            q: "مَا الْمَقْصُودُ بِكَلِمَةِ «الزَّلَلِ» كَمَا فَهِمْتَ مِنَ الدَّرْسِ؟", 
+            options: ["الْخَطَأُ", "الْغُرُورُ", "الْهَزِيمَةُ", "الْخُسْرَانُ"], 
+            answer: "الْخَطَأُ", 
+            exp: "خَشْيَةَ الزَّلَلِ أَيْ خَوْفًا مِنَ الْوُقُوعِ فِي الْخَطَإِ بِاخْتِيَارِ صَدِيقٍ سَيِّئٍ." 
+        },
+        { 
+            q: "مَاذَا أَفَادَ اسْتِخْدَامُ (كَمْ) فِي قَوْلِهِ: «فَكَمْ مِنْ أُنَاسٍ غَرَّهُمْ خِدَاعُ مَنْ حَوْلَهُمْ»؟", 
+            options: ["أَفَادَ الْكَثْرَةَ", "أَفَادَ الِاسْتِفْهَامَ وَالسُّؤَالَ", "أَفَادَ التَّقْلِيلَ", "أَفَادَ النَّفْيَ وَالشَّكَّ"], 
+            answer: "أَفَادَ الْكَثْرَةَ", 
+            exp: "(كَمْ) الْخَبَرِيَّةُ هُنَا تُسْتَخْدَمُ لِلدَّلَالَةِ عَلَى كَثْرَةِ النَّاسِ الَّذِينَ انْخَدَعُوا بِمَنْ حَوْلَهُمْ." 
+        },
+        { 
+            q: "مَا نَوْعُ الْعَلَاقَةِ بَيْنَ الْكَلِمَتَيْنِ (وُدًّا) وَ (بُغْضًا) كَمَا فِي تَدْرِيبَاتِ الدَّرْسِ؟", 
+            options: ["تَضَادٌّ يُوَضِّحُ الْمَعْنَى وَيُؤَكِّدُهُ", "تَرَادُفٌ يُقَوِّي الْعَاطِفَةَ", "نَتِيجَةٌ مُنْطِقِيَّةٌ", "تَعْلِيلٌ لِمَا قَبْلَهُ"], 
+            answer: "تَضَادٌّ يُوَضِّحُ الْمَعْنَى وَيُؤَكِّدُهُ", 
+            exp: "الْوُدُّ هُوَ الْمَحَبَّةُ، وَالْبُغْضُ هُوَ الْكُرْهُ، وَبَيْنَهُمَا تَضَادٌّ يُبْرِزُ التَّنَاقُضَ بَيْنَ الظَّاهِرِ الزَّائِفِ وَالْبَاطِنِ الْحَاقِدِ." 
+        },
+        { 
+            q: "مَا مُرَادِفُ كَلِمَةِ «مَوْجِدَةٌ» فِي قَوْلِهِ: «بَلْ بُغْضًا وَمَوْجِدَةً»؟", 
+            options: ["حِقْدٌ وَكَرَاهِيَةٌ وَعَدَاوَةٌ", "مُجَامَلَةٌ وَمَحَبَّةٌ", "صِدْقٌ وَأَمَانَةٌ", "تَسَرُّعٌ وَانْدِفَاعٌ"], 
+            answer: "حِقْدٌ وَكَرَاهِيَةٌ وَعَدَاوَةٌ", 
+            exp: "الْمَوْجِدَةُ هِيَ الْحِقْدُ وَالْكَرَاهِيَةُ الَّتِي يُخْفِيهَا صَدِيقُ الْمَصْلَحَةِ أَوْ السُّوءِ." 
+        },
+        { 
+            q: "كَيْفَ وَصَفَ الْكَاتِبُ دَوْرَ الصَّدِيقِ فِي خَاتِمَةِ النَّصِّ؟", 
+            options: ["شَرِيكٌ أَسَاسِيٌّ فِي صِيَاغَةِ الْمُسْتَقْبَلِ وَنَحْتِ الشَّخْصِيَّةِ", "رَفِيقٌ عَابِرٌ يُخَفِّفُ عَنَاءَ الرِّحْلَةِ فَقَطْ", "جَلِيسٌ لِلْمُتْعَةِ وَالتَّرْفِيهِ عَنِ النَّفْسِ", "شَخْصٌ نَسْتَغِلُّهُ לِتَحْقِيقِ الْمَنَافِعِ الْمَادِّيَّةِ"], 
+            answer: "شَرِيكٌ أَسَاسِيٌّ فِي صِيَاغَةِ الْمُسْتَقْبَلِ وَنَحْتِ الشَّخْصِيَّةِ", 
+            exp: "قَالَ الْكَاتِبُ صَرَاحَةً: (بَلْ هُوَ شَرِيكٌ أَسَاسِيٌّ فِي صِيَاغَةِ مُسْتَقْبَلِكَ، وَنَحْتِ مَلَامِحِ شَخْصِيَّتِكَ)." 
+        },
+        { 
+            q: "مَا مَعْنَى كَلِمَةِ «عَابِرٍ» فِي قَوْلِهِ: «لَيْسَ مُجَرَّدَ رَفِيقٍ عَابِرٍ»؟", 
+            options: ["زَائِلٍ وَغَيْرِ دَائِمٍ", "أَمِينٍ وَصَادِقٍ", "مُتَكَبِّرٍ وَمَغْرُورٍ", "ذَكِيٍّ وَفَطِنٍ"], 
+            answer: "زَائِلٍ وَغَيْرِ دَائِمٍ", 
+            exp: "رَفِيقٌ عَابِرٌ أَيْ أَنَّهُ مُجَرَّدُ صَاحِبٍ مُؤَقَّتٍ أَوْ زَائِلٍ، وَالْكَاتِبُ يَنْفِي ذَلِكَ عَنِ الصَّدِيقِ الْحَقِيقِيِّ." 
+        },
+        { 
+            q: "مَا دَلَالَةُ قَوْلِ الْكَاتِبِ: «وَكَمَا يَحْفَظُ لَكَ حُضُورَكَ يَحْفَظُ غَيْبَتَكَ»؟", 
+            options: ["إِخْلَاصُ الصَّدِيقِ وَعَدَمُ السَّمَاحِ بِاغْتِيَابِ صَدِيقِهِ", "الِاهْتِمَامُ بِالتَّوَاصُلِ الْهَاتِفِيِّ عِنْدَ الْغِيَابِ", "أَنَّهُ يَنْتَظِرُ الْهَدَايَا كَمَا فِي الْحُضُورِ", "يُفَضِّلُ الْعُزْلَةَ مَعَ صَدِيقِهِ فَقَطْ"], 
+            answer: "إِخْلَاصُ الصَّدِيقِ وَعَدَمُ السَّمَاحِ بِاغْتِيَابِ صَدِيقِهِ", 
+            exp: "يَدُلُّ عَلَى أَمَانَتِهِ فِي الدِّفَاعِ عَنْكَ وَعَنْ كَرَامَتِكَ سَوَاءٌ كُنْتَ حَاضِرًا أَمْ غَائِبًا." 
+        },
+        { 
+            q: "مَا مَوْقِفُ الصَّدِيقِ الْحَقِيقِيِّ حِينَمَا يُسْدِي مَعْرُوفًا لِصَدِيقِهِ حَسْبَ النَّصِّ؟", 
+            options: ["لَا يَنْتَظِرُ مُكَافَأَةً أَوْ اعْتِرَافًا مُتَكَرِّرًا بِالْفَضْلِ", "يُذَكِّرُ صَدِيقَهُ بِفَضْلِهِ كُلَّمَا الْتَقَيَا", "يَنْتَظِرُ الْهَدِيَّةَ الْمُقَابِلَةَ مُبَاشَرَةً", "يَتَجَنَّبُ صَدِيقَهُ لِئَلَّا يُثْقِلَ عَلَيْهِ"], 
+            answer: "لَا يَنْتَظِرُ مُكَافَأَةً أَوْ اعْتِرَافًا مُتَكَرِّرًا بِالْفَضْلِ", 
+            exp: "الصَّدَاقَةُ مَبْنِيَّةٌ عَلَى الْإِيثَارِ؛ لِذَا طَلَبَ الْكَاتِبُ أَلَّا تَجْعَلَ صَدِيقَكَ يَعْتَرِفُ بِفَضْلِكَ مِرَارًا وَلَا أَنْ يُكَافِئَكَ." 
+        },
+        { 
+            q: "بِمَ وَصَفَ الْكَاتِبُ الْإِنْسَانَ الرَّشِيدَ (حَصِيفَ الرَّأْيِ) فِي تَعَامُلِهِ مَعَ أَصْدِقَائِهِ خُلَصَائِهِ؟", 
+            options: ["لَا يَسْتَغْنِي عَنِ اسْتِشَارَةِ خُلَصَائِهِ", "يَسْتَغْنِي عَنِ النَّاسِ بِذَكَائِهِ وَحِكْمَتِهِ", "يَتَكَبَّرُ عَلَى نَصَائِحِهِمْ الْمُتَكَرِّرَةِ", "يَخْفِي أَسْرَارَهُ عَنِ الْجَمِيعِ خَوْفًا"], 
+            answer: "لَا يَسْتَغْنِي عَنِ اسْتِشَارَةِ خُلَصَائِهِ", 
+            exp: "قَالَ الْكَاتِبُ: (وَمَهْمَا كَانَ الْإِنْسَانُ حَصِيفًا... فَلَا يَسْتَغْنِي عَمَّنْ يَسْتَشِيرُهُمْ مِنْ خُلَصَائِهِ)." 
+        },
+        { 
+            q: "«الْمَرْءُ عَلَى دِينِ خَلِيلِهِ، فَلْيَنْظُرْ أَحَدُكُمْ مَنْ يُخَالِلُ»، مَا الْقِيمَةُ الْمُشْتَرَكَةُ بَيْنَ الْحَدِيثِ وَالنَّصِّ؟", 
+            options: ["أَهَمِّيَّةُ الدِّقَّةِ وَحُسْنِ انْتِقَاءِ الصَّدِيقِ", "ضَرُورَةُ مُسَامَحَةِ الْأَصْدِقَاءِ", "أَهَمِّيَّةُ إِغَاثَةِ الْمَلْهُوفِ", "تَجَنُّبُ الْجِدَالِ الْمُسْتَمِرِّ"], 
+            answer: "أَهَمِّيَّةُ الدِّقَّةِ وَحُسْنِ انْتِقَاءِ الصَّدِيقِ", 
+            exp: "كِلَاهُمَا يُؤَكِّدُ عَلَى التَّرَوِّي وَالتَّثَبُّتِ فِي اخْتِيَارِ الْأَصْدِقَاءِ؛ لِأَنَّ الصَّدِيقَ يُؤَثِّرُ عَلَى صَاحِبِهِ جِدًّا." 
+        },
+        { 
+            q: "كَيْفَ تُعْرَفُ حَقِيقَةُ (صَدِيقِ السُّوءِ أَوِ الْمَصْلَحَةِ) كَمَا فُهِمَ مِنَ الدَّرْسِ؟", 
+            options: ["يَتَخَلَّى عَنْكَ وَيُظْهِرُ الْعَدَاوَةَ عِنْدَ زَوَالِ مَصْلَحَتِهِ", "يُعَاتِبُكَ كَثِيرًا فِي أَوْقَاتِ الرَّخَاءِ", "يَحْفَظُ السِّرَّ وَلَكِنَّهُ لَا يُسَاعِدُ مَادِيًّا", "لَا يُقَدِّمُ الْكَلِمَاتِ الْمَعْسُولَةَ أَبَدًا"], 
+            answer: "يَتَخَلَّى عَنْكَ وَيُظْهِرُ الْعَدَاوَةَ عِنْدَ زَوَالِ مَصْلَحَتِهِ", 
+            exp: "هَؤُلَاءِ يَخْدَعُونَ بِالْكَلِمَاتِ الْمَعْسُولَةِ، حَتَّى إِذَا دَارَتِ الْأَيَّامُ (تَغَيَّرَتِ الظُّرُوفُ) أَظْهَرُوا لَهُمُ الْعَدَاوَةَ." 
+        },
+        { 
+            q: "عَلَامَ يَدُلُّ التَّعْبِيرُ فِي النَّصِّ بِـ «نَحْتِ مَلَامِحِ شَخْصِيَّتِكَ»؟", 
+            options: ["الْأَثَرُ الْعَمِيقُ وَالْقَوِيُّ لِلصَّدِيقِ فِي تَوْجِيهِ سُلُوكِ صَاحِبِهِ", "الِاهْتِمَامُ بِالْمَظْهَرِ الْخَارِجِيِّ لِلْأَصْدِقَاءِ", "صُعُوبَةُ إِيجَادِ الصَّدِيقِ فِي الْوَقْتِ الْحَالِيِّ", "تَغْيِيرُ الشَّخْصِيَّةِ بِصُعُوبَةٍ مَعَ مُرُورِ الزَّمَنِ"], 
+            answer: "الْأَثَرُ الْعَمِيقُ وَالْقَوِيُّ لِلصَّدِيقِ فِي تَوْجِيهِ سُلُوكِ صَاحِبِهِ", 
+            exp: "كَلِمَةُ «نَحْت» تَدُلُّ عَلَى التَّشْكِيلِ الْعَمِيقِ الثَّابِتِ، مِمَّا يُؤَكِّدُ قُوَّةَ تَأْثِيرِ الصَّدِيقِ فِي صِنَاعَةِ شَخْصِيَّتِكَ." 
+        },
+        { 
+            q: "أَيُّ السُّلُوكِيَّاتِ التَّالِيَةِ حَذَّرَ مِنْهَا النَّصُّ فِي التَّعَامُلِ مَعَ الْأَصْدِقَاءِ؟", 
+            options: ["كَثْرَةُ الْجِدَالِ وَالْمِرَاءِ الَّذِي يُفْسِدُ الصَّدَاقَةَ", "قَبُولُ مَيْسُورِ الْوُدِّ مِنْهُمْ", "الِاسْتِمَاعُ لِنَصَائِحِهِمْ", "اسْتِشَارَتُهُمْ فِي الْأُمُورِ الصَّعْبَةِ"], 
+            answer: "كَثْرَةُ الْجِدَالِ وَالْمِرَاءِ الَّذِي يُفْسِدُ الصَّدَاقَةَ", 
+            exp: "قَالَ الْكَاتِبُ مُحَذِّرًا: (وَلَا يَدْخُلُ مَعَهُ فِي مِرَاءٍ أَوْ جِدَالٍ يُفْسِدُ صَدَاقَتَهُمَا)." 
+        },
+        { 
+            q: "مَا مُرَادِفُ كَلِمَةِ «التَّرَوِّي» فِي قَوْلِهِ: «مِنَ التَّرَوِّي وَالتَّثَبُّتِ فِي اخْتِيَارِ الصَّدِيقِ»؟", 
+            options: ["التَّأَنِّي وَالتَّمَهُّلُ", "التَّسَرُّعُ وَالِانْدِفَاعُ", "التَّعَاوُنُ وَالْمُشَارَكَةُ", "الْمُنَافَسَةُ وَالتَّحَدِّي"], 
+            answer: "التَّأَنِّي وَالتَّمَهُّلُ", 
+            exp: "التَّرَوِّي يَعْنِي عَدَمَ التَّسَرُّعِ، أَيْ التَّأَنِّي وَالتَّفْكِيرَ الْعَمِيقَ قَبْلَ الِاخْتِيَارِ." 
+        },
+        { 
+            q: "لِمَاذَا ذَكَرَ الْكَاتِبُ أَنَّ الصَّدِيقَ يَجِدُ فِي أَدَاءِ حُقُوقِ صَدِيقِهِ «مَتَاعًا لَا يَفُوقُهُ مَتَاعٌ»؟", 
+            options: ["لِيُؤَكِّدَ أَنَّ مُسَاعَدَتَهُ نَابِعَةٌ مِنْ حُبٍّ خَالِصٍ تُسْعِدُ صَاحِبَهَا", "لِيُبَيِّنَ أَنَّ الْمُسَاعَدَةَ تَعُودُ بِعَائِدٍ مَادِّيٍّ عَلَيْهِ", "لِأَنَّهُ مَجْبَرٌ عَلَى أَدَاءِ هَذَا الْوَاجِبِ الصَّعْبِ", "لِيُشَجِّعَهُ عَلَى طَلَبِ الْمُكَافَأَةِ فِي الْمُسْتَقْبَلِ"], 
+            answer: "لِيُؤَكِّدَ أَنَّ مُسَاعَدَتَهُ نَابِعَةٌ مِنْ حُبٍّ خَالِصٍ تُسْعِدُ صَاحِبَهَا", 
+            exp: "الصَّدِيقُ الْمُخْلِصُ يَشْعُرُ بِالْمُتْعَةِ وَالسَّعَادَةِ الدَّاخِلِيَّةِ حِينَ يُقَدِّمُ الْخَيْرَ لِصَدِيقِهِ دُونَ اعْتِبَارٍ لِأَيِّ ثَمَنٍ." 
+        },
+        { 
+            q: "مَا الْفِكْرَةُ الرَّئِيسَةُ الَّتِي يَدُورُ حَوْلَهَا هَذَا الْمَقَالُ (النَّصُّ) بِأَكْمَلِهِ؟", 
+            options: ["أَهَمِّيَّةُ الصَّدِيقِ الْوَفِيِّ فِي الْحَيَاةِ وَأُسُسُ الصَّدَاقَةِ الْحَقِيقِيَّةِ", "مَخَاطِرُ التَّوَاصُلِ الِافْتِرَاضِيِّ عَبْرَ الْإِنْتِرْنِت", "كَيْفِيَّةُ الْوُصُولِ إِلَى النَّجَاحِ الْمِهَنِيِّ", "تَجَنُّبُ الْأَخْطَاءِ النَّحْوِيَّةِ فِي التَّحَدُّثِ"], 
+            answer: "أَهَمِّيَّةُ الصَّدِيقِ الْوَفِيِّ فِي الْحَيَاةِ وَأُسُسُ الصَّدَاقَةِ الْحَقِيقِيَّةِ", 
+            exp: "النَّصُّ بِكَامِلِ فِقَرَاتِهِ يُبْرِزُ صِفَاتِ الصَّدِيقِ الْمُخْلِصِ، وَيُحَذِّرُ مِنْ خِدَاعِ صَدِيقِ الْمَصْلَحَةِ لِأَثَرِ ذَلِكَ عَلَى مُسْتَقْبَلِنَا." 
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswersData = [];
+
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function toArabicNumeral(n) {
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return n.toString().split('').map(char => arabicNumbers[char] || char).join('');
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswersData = [];
+        showScreen('screen-quiz');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const questionData = allQuestions[currentQuestionIndex];
+        
+        const percent = ((currentQuestionIndex) / allQuestions.length) * 100;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-text').innerText = `السُّؤَالُ ${toArabicNumeral(currentQuestionIndex + 1)} / ${toArabicNumeral(allQuestions.length)}`;
+
+        document.getElementById('question-text').innerText = questionData.q;
+
+        document.getElementById('feedback-container').style.display = 'none';
+
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        
+        let shuffledOptions = [...questionData.options];
+        
+        if (shuffledOptions.length > 2) {
+            shuffleArray(shuffledOptions);
+        }
+
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(btn, opt, questionData);
+            optionsContainer.appendChild(btn);
+        });
+
+        const nextBtn = document.getElementById('btn-next');
+        if (currentQuestionIndex === allQuestions.length - 1) {
+            nextBtn.innerText = "إِنْهَاءُ الِاخْتِبَارِ";
+        } else {
+            nextBtn.innerText = "السُّؤَالُ التَّالِي";
+        }
+    }
+
+    function selectOption(selectedBtn, selectedText, questionData) {
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(btn => btn.disabled = true);
+
+        const isCorrect = (selectedText === questionData.answer);
+        
+        userAnswersData.push({
+            q: questionData.q,
+            userAns: selectedText,
+            correctAns: questionData.answer,
+            isCorrect: isCorrect
+        });
+
+        if (isCorrect) {
+            score++;
+            selectedBtn.classList.add('correct');
+            showFeedback(true, questionData.exp);
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(btn => {
+                if (btn.innerText === questionData.answer) {
+                    btn.classList.add('correct');
+                }
+            });
+            showFeedback(false, questionData.exp);
+        }
+    }
+
+    function showFeedback(isCorrect, explanation) {
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-explanation');
+
+        feedbackContainer.style.display = 'flex';
+        
+        if (isCorrect) {
+            feedbackMessage.innerText = "إِجَابَةٌ صَحِيحَةٌ ✓";
+            feedbackMessage.style.color = "var(--green)";
+        } else {
+            feedbackMessage.innerText = "إِجَابَةٌ خَاطِئَةٌ ✗";
+            feedbackMessage.style.color = "var(--red)";
+        }
+        
+        feedbackExp.innerText = explanation;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < allQuestions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('progress-bar').style.width = '100%';
+        
+        const percentage = Math.round((score / allQuestions.length) * 100);
+        document.getElementById('score-text').innerText = `${toArabicNumeral(score)}/${toArabicNumeral(allQuestions.length)}`;
+        document.getElementById('percentage-text').innerText = `${toArabicNumeral(percentage)}٪`;
+
+        const evalText = document.getElementById('evaluation-text');
+        if (percentage >= 90) {
+            evalText.innerText = "مُمْتَازٌ! أَنْتَ صَدِيقٌ حَصِيفٌ وَمُتَمَيِّزٌ بِفَهْمِ النَّصِّ.";
+            evalText.style.color = "var(--green)";
+        } else if (percentage >= 80) {
+            evalText.innerText = "جَيِّدٌ جِدًّا، فَهْمُكَ لِدَرْسِ الصَّدَاقَةِ عَمِيقٌ وَوَاضِحٌ.";
+            evalText.style.color = "var(--green)";
+        } else if (percentage >= 60) {
+            evalText.innerText = "جَيِّدٌ، وَلَكِنْ نَنْصَحُكَ بِقِرَاءَةِ دَرْسِ الصَّدَاقَةِ مَرَّةً أُخْرَى.";
+            evalText.style.color = "var(--secondary)";
+        } else {
+            evalText.innerText = "تَحْتَاجُ إِلَى التَّرَوِّي وَإِعَادَةِ قِرَاءَةِ نَصِّ الدُّكْتُورِ شَوْقِي ضَيْفٍ.";
+            evalText.style.color = "var(--red)";
+        }
+
+        showScreen('screen-result');
+    }
+
+    function showReview() {
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
+
+        userAnswersData.forEach((item, index) => {
+            const reviewItem = document.createElement('div');
+            reviewItem.className = 'review-item';
+            
+            let ansHtml = '';
+            if (item.isCorrect) {
+                ansHtml = `<div class="text-green">إِجَابَتُكَ: ${item.userAns} ✓</div>`;
+            } else {
+                ansHtml = `
+                    <div class="text-red">إِجَابَتُكَ: ${item.userAns} ✗</div>
+                    <div class="text-green">الإِجَابَةُ الصَّحِيحَةُ: ${item.correctAns}</div>
+                `;
+            }
+
+            reviewItem.innerHTML = `
+                <div class="review-q">${toArabicNumeral(index + 1)}. ${item.q}</div>
+                <div class="review-ans">${ansHtml}</div>
+            `;
+            reviewList.appendChild(reviewItem);
+        });
+
+        showScreen('screen-review');
+    }
+
+    function restartQuiz() {
+        showScreen('screen-start');
+    }
+
+</script>
+</body>
+</html>

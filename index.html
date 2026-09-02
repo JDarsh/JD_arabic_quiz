@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة اختبارات اللغة العربية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16302B;
+    --ink-light: #1F433C;
+    --paper: #F5EFE1;
+    --paper-dark: #E9E0C9;
+    --line: #D9CDA6;
+    --gold: #C89B3C;
+    --gold-light: #E0BE6E;
+    --brick: #9C4A3C;
+    --plum: #6B5B7E;
+    --text: #211B12;
+    --text-muted: #6E6656;
+    --paper-text: #FBF7EC;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+  }
+
+  body {
+    background-image:
+      repeating-linear-gradient(transparent, transparent 42px, var(--line) 43px);
+    background-attachment: local;
+  }
+
+  a { text-decoration: none; color: inherit; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: linear-gradient(160deg, var(--ink) 0%, var(--ink-light) 100%);
+    color: var(--paper-text);
+    padding: 64px 24px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 15% 20%, rgba(200,155,60,0.10), transparent 40%),
+                       radial-gradient(circle at 85% 75%, rgba(200,155,60,0.08), transparent 45%);
+    pointer-events: none;
+  }
+
+  .hero__inner {
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero__kicker {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--gold-light);
+    margin: 0 0 14px;
+  }
+
+  .hero__title {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: clamp(34px, 6vw, 58px);
+    line-height: 1.25;
+    margin: 0 0 18px;
+  }
+
+  .hero__subtitle {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #D9D0BC;
+    max-width: 640px;
+    margin: 0 auto 40px;
+  }
+
+  .search {
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .search input {
+    width: 100%;
+    padding: 16px 52px 16px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(224, 190, 110, 0.35);
+    background: rgba(255,255,255,0.06);
+    color: var(--paper-text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+
+  .search input::placeholder { color: #A79E88; }
+  .search input:focus { border-color: var(--gold); background: rgba(255,255,255,0.1); }
+
+  .search svg {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    stroke: #A79E88;
+  }
+
+  /* ---------- Filter chips ---------- */
+  .filters {
+    max-width: 1040px;
+    margin: -42px auto 0;
+    padding: 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .chip {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    background: var(--paper);
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 11px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(22,48,43,0.08);
+    transition: background .15s, color .15s, border-color .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .chip__count {
+    font-size: 12px;
+    opacity: 0.65;
+  }
+
+  .chip:hover { border-color: var(--gold); }
+
+  .chip.is-active {
+    background: var(--ink);
+    color: var(--paper-text);
+    border-color: var(--ink);
+  }
+
+  /* ---------- Grid ---------- */
+  .content {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 48px 24px 100px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 20px;
+  }
+
+  .empty {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+
+  .card {
+    background: var(--paper-dark);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 26px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    border-right: 5px solid var(--teal-accent, var(--ink));
+  }
+
+  .card--teal  { border-right-color: var(--ink); }
+  .card--brick { border-right-color: var(--brick); }
+  .card--gold  { border-right-color: var(--gold); }
+  .card--plum  { border-right-color: var(--plum); }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(22,48,43,0.14);
+    border-color: #C9BB8E;
+  }
+
+  .card__tab {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .card__title {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.5;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .card__go {
+    margin-top: auto;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card__go svg { transform: scaleX(-1); transition: transform .18s; }
+  .card:hover .card__go svg { transform: scaleX(-1) translateX(-3px); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 48px 18px 80px; }
+    .filters { margin-top: -34px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="hero__kicker">اللغة العربية · نحو · قراءة · نصوص</p>
+      <h1 class="hero__title">بوابة اختبارات اللغة العربية</h1>
+      <p class="hero__subtitle">مجموعة اختبارات تفاعلية تغطي القواعد النحوية والنصوص القرائية لمراحل دراسية مختلفة. اختر اختبارًا من القائمة أدناه وابدأ فورًا.</p>
+      <div class="search">
+        <input id="searchBox" type="text" placeholder="ابحث عن اختبار بالاسم…" autocomplete="off">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <nav class="filters" id="filters">
+    <button class="chip is-active" data-filter="all">الكل <span class="chip__count">22</span></button>
+<button class="chip" data-filter="grade6">الصف السادس <span class="chip__count">11</span></button>
+<button class="chip" data-filter="grade3">الصف الثالث <span class="chip__count">7</span></button>
+<button class="chip" data-filter="gen">اختبارات عامة <span class="chip__count">4</span></button>
+  </nav>
+
+  <main class="content">
+    <div class="grid" id="grid">
+      
+        <a class="card card--teal" href="أنواع الخبر 6ب ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - أنواع الخبر">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - أنواع الخبر</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="الأسماء الخمسة 6ب ت 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - الأسماء الخمسة">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - الأسماء الخمسة</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="النكرة والمعرفة 6ب ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - النكرة والمعرفة">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - النكرة والمعرفة</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="بناة المحد 6ب ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - بناة المجد">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - بناة المجد</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="رحلة إلى المستقبل 6ب ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - رحلة إلى المستقبل">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - رحلة إلى المستقبل</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="سعادة الأوطان 6ب ترم أول.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - سعادة الأوطان">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - سعادة الأوطان</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="اختبار تفاعلي عام في النحو 60 سؤالا  6ب ت أول.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - قواعد نحوية شاملة">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - قواعد نحوية شاملة</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="قوة الكلمات 6ب ت 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - قوة الكلمات">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - قوة الكلمات</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="كان وأخواتها 6ب ترم أول.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - كان وأخواتها">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - كان وأخواتها</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="كنز لايقدر بثمن 6ب ترم أول.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - كنز لا يقدر بثمن">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - كنز لا يقدر بثمن</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--teal" href="من وراء الكاميرا قراءة 6ب ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade6" data-search="اختبار تفاعلي - من وراء الكاميرا">
+          <span class="card__tab">الصف السادس</span>
+          <h3 class="card__title">اختبار تفاعلي - من وراء الكاميرا</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="أغلى من الذهب 3ع ترم اول 2027.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - أغلى من الذهب">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - أغلى من الذهب</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="اسم المفعول 3ع ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - اسم المفعول">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - اسم المفعول</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="إملاء الألف اللينة3ع ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - الألف اللينة">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - الألف اللينة</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="النص الشعري تحية للشباب 3ع ت1.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - تحية للشباب">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - تحية للشباب</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="الصداقة قراءة 3ع ت 1.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - درس الصداقة">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - درس الصداقة</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--brick" href="اختبار شامل على الوحدة الأولى 3ع ترم 1.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار شامل - الوحدة الأولى">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار شامل - الوحدة الأولى</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--gold" href="اسم الفاعل 3ت ترم أو 2027.html" target="_blank" rel="noopener"
+           data-cat="grade3" data-search="اختبار تفاعلي - اسم الفاعل">
+          <span class="card__tab">الصف الثالث</span>
+          <h3 class="card__title">اختبار تفاعلي - اسم الفاعل</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--plum" href="نص إلى الشباب.html" target="_blank" rel="noopener"
+           data-cat="gen" data-search="اختبار تفاعلي - إلى الشباب">
+          <span class="card__tab">اختبارات عامة</span>
+          <h3 class="card__title">اختبار تفاعلي - إلى الشباب</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--plum" href="قراءة اصنع قرارك.html" target="_blank" rel="noopener"
+           data-cat="gen" data-search="اختبار تفاعلي - درس اصنع قرارك">
+          <span class="card__tab">اختبارات عامة</span>
+          <h3 class="card__title">اختبار تفاعلي - درس اصنع قرارك</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--plum" href="سر القوة والنجاح.html" target="_blank" rel="noopener"
+           data-cat="gen" data-search="اختبار تفاعلي - سر القوة والنجاح">
+          <span class="card__tab">اختبارات عامة</span>
+          <h3 class="card__title">اختبار تفاعلي - سر القوة والنجاح</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+
+        <a class="card card--plum" href="كنز لايقدر بثمن.html" target="_blank" rel="noopener"
+           data-cat="gen" data-search="اختبار تفاعلي - كنز لا يقدر بثمن">
+          <span class="card__tab">اختبارات عامة</span>
+          <h3 class="card__title">اختبار تفاعلي - كنز لا يقدر بثمن</h3>
+          <span class="card__go">ابدأ الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l-7 7 7 7"/></svg></span>
+        </a>
+    </div>
+    <p class="empty" id="emptyState">لا توجد اختبارات مطابقة لبحثك.</p>
+  </main>
+
+  <footer>
+    22 اختبارًا تفاعليًا · افتح أي اختبار في نافذة جديدة
+  </footer>
+
+<script>
+  const chips = document.querySelectorAll('.chip');
+  const cards = document.querySelectorAll('.card');
+  const searchBox = document.getElementById('searchBox');
+  const emptyState = document.getElementById('emptyState');
+  let activeFilter = 'all';
+
+  function applyFilters() {
+    const q = searchBox.value.trim().toLowerCase();
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const matchesCat = activeFilter === 'all' || card.dataset.cat === activeFilter;
+      const matchesSearch = !q || card.dataset.search.toLowerCase().includes(q);
+      const show = matchesCat && matchesSearch;
+      card.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+      activeFilter = chip.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  searchBox.addEventListener('input', applyFilters);
+</script>
+
+</body>
+</html>

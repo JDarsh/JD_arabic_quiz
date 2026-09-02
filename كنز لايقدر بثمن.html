@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اخْتِبَارٌ تَفَاعُلِيّ - كَنْزٌ لَا يُقَدَّرُ بِثَمَنٍ</title>
+    <style>
+        :root {
+            --primary: #92400e; /* Amber 800 */
+            --secondary: #fbbf24; /* Amber 400 */
+            --white: #ffffff;
+            --green: #10b981;
+            --red: #ef4444;
+            --text-dark: #1e1b4b;
+        }
+
+        body { margin: 0; padding: 0; background-color: #020617; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; user-select: none; }
+        
+        #app-container { background-color: var(--primary); color: var(--white); width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
+
+        .screen { display: none; flex-direction: column; width: 100%; height: 100%; padding: 4vh 5vw; box-sizing: border-box; }
+        .screen.active { display: flex; }
+
+        /* Start Screen */
+        .start-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        h1 { font-size: 6.5vh; color: var(--secondary); margin: 0 0 2vh 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.4); }
+        .btn-large { background-color: var(--secondary); color: var(--text-dark); font-size: 5vh; font-weight: bold; padding: 2vh 6vw; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.1s; }
+        .btn-large:active { transform: scale(0.95); }
+
+        /* Quiz Screen */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; font-size: 3vh; font-weight: bold; margin-bottom: 2vh; color: var(--secondary); }
+        .progress-container { width: 100%; height: 2vh; background: rgba(255,255,255,0.2); border-radius: 20px; overflow: hidden; margin-bottom: 4vh; }
+        .progress-bar { height: 100%; background-color: var(--secondary); width: 0%; transition: width 0.3s; }
+        .question-text { font-size: 4.5vh; font-weight: bold; text-align: center; margin-bottom: 4vh; flex: 1; display: flex; align-items: center; justify-content: center; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2vh; margin-bottom: 4vh; }
+        .option-btn { background: var(--white); color: var(--text-dark); font-size: 3.5vh; font-weight: bold; padding: 2vh; border-radius: 15px; cursor: pointer; border: none; transition: all 0.2s; }
+        .option-btn:disabled { opacity: 0.8; }
+        .option-btn.correct { background: var(--green); color: var(--white); }
+        .option-btn.wrong { background: var(--red); color: var(--white); }
+        .feedback-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 2vh; border-radius: 15px; }
+
+        /* Result & Review */
+        .result-container { display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1; text-align: center; }
+        .review-list { flex: 1; overflow-y: auto; padding-right: 2vw; width: 100%; }
+        .review-item { background: rgba(0,0,0,0.2); padding: 2vh; margin-bottom: 2vh; border-radius: 10px; border-right: 1vh solid var(--secondary); text-align: right; }
+        .text-green { color: var(--green); } .text-red { color: var(--red); }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="screen-start" class="screen active">
+        <div class="start-content">
+            <h1>دَرْسُ: كَنْزٌ لَا يُقَدَّرُ بِثَمَنٍ</h1>
+            <button class="btn-large" onclick="startQuiz()">ابدأ الاختبار</button>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="top-bar">
+            <div id="progress-text">السُّؤَالُ ١ / ٣٠</div>
+            <div id="progress-percent">٠٪</div>
+        </div>
+        <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+        <div id="question-text" class="question-text"></div>
+        <div id="options-container" class="options-grid"></div>
+        <div id="feedback-container" class="feedback-container">
+            <div id="feedback-message" style="font-size: 4vh; font-weight: bold;"></div>
+            <div id="feedback-explanation" style="font-size: 3vh; margin: 1vh 0;"></div>
+            <button class="btn-next" onclick="nextQuestion()" style="background: var(--secondary); border: none; padding: 1vh 3vw; border-radius: 20px; cursor: pointer; font-size: 3vh;">السؤال التالي</button>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-container">
+            <h1>نتيجة الاختبار</h1>
+            <div id="score-text" style="font-size: 10vh;">٠/٣٠</div>
+            <div style="display:flex; gap:2vh;">
+                <button onclick="showReview()" style="padding: 1vh 2vw; border-radius: 20px; cursor: pointer; font-size: 3vh;">مراجعة الإجابات</button>
+                <button onclick="restartQuiz()" style="padding: 1vh 2vw; border-radius: 20px; cursor: pointer; font-size: 3vh;">إعادة الاختبار</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-review" class="screen">
+        <div style="margin-bottom: 2vh;"><h2 style="color: var(--secondary);">مراجعة الإجابات</h2></div>
+        <div id="review-list" class="review-list"></div>
+        <button class="btn-next" onclick="showScreen('screen-result')" style="padding: 1vh 3vw; border-radius: 20px; cursor: pointer; font-size: 3vh;">العودة للنتيجة</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "مَا هُوَ الكَنْزُ الحَقِيقِيُّ الَّذِي يُشِيرُ إِلَيْهِ الدَّرْسُ؟", options: ["العِلْمُ وَالقِيَمُ", "المَالُ وَالذَّهَبُ", "الشُّهْرَةُ", "الطَّعَامُ"], answer: "العِلْمُ وَالقِيَمُ", exp: "يُؤَكِّدُ الدَّرْسُ أَنَّ العلم والقيم هما الكنز الذي لا يفنى." },
+        { q: "مَاذَا يَعْنِي وَصْفُ الشَّيْءِ بِأَنَّهُ «لَا يُقَدَّرُ بِثَمَنٍ»؟", options: ["أَنَّهُ غَالٍ وَعَظِيمُ القِيمَةِ", "أَنَّهُ رَخِيصٌ", "أَنَّهُ قَدِيمٌ", "أَنَّهُ غَيْرُ مَوْجُودٍ"], answer: "أَنَّهُ غَالٍ وَعَظِيمُ القِيمَةِ", exp: "يُقَالُ هَذَا لِلأَشْيَاءِ الَّتِي لَا يُمْكِنُ شِرَاؤُهَا بِالْمَالِ." },
+        { q: "مَا هُوَ التَّصَرُّفُ الحَكِيمُ اتِّجَاهَ نِعْمَةِ العِلْمِ؟", options: ["السَّعْيُ فِي طَلَبِهِ وَتَوْظِيفُهُ لِلْخَيْرِ", "إِخْفَاؤُهُ عَنِ الآخَرِينَ", "الْتَّكَبُّرُ بِهِ", "إِهْمَالُهُ"], answer: "السَّعْيُ فِي طَلَبِهِ وَتَوْظِيفُهُ لِلْخَيْرِ", exp: "العلم أمانةٌ ومسؤوليةٌ، ويجب استخدامه لنفع المجتمع." },
+        { q: "مَا مَعْنَى كَلِمَةِ «نَفِيسٌ»؟", options: ["ثَمِينٌ وَقَيِّمٌ", "رَخِيصٌ", "قَدِيمٌ", "مُؤْذٍ"], answer: "ثَمِينٌ وَقَيِّمٌ", exp: "النَّفِيسُ هُوَ كُلُّ شَيْءٍ ذِي قِيمَةٍ عَالِيَةٍ." },
+        { q: "مَاذَا يَحْدُثُ لِلْعِلْمِ إِذَا شَارَكْنَاهُ مَعَ الآخَرِينَ؟", options: ["يَنْمُو وَيَزْدَادُ", "يَنْقُصُ", "يَخْتَفِي", "يَصْعُبُ حِفْظُهُ"], answer: "يَنْمُو وَيَزْدَادُ", exp: "عَلَى عَكْسِ الْمَالِ، كُلَّمَا نَشَرْتَ عِلْمَكَ زَادَ تَرَاسُخًا وَاتِّسَاعًا." },
+        { q: "أَيُّ الصِّفَاتِ يَنْبَغِي أَنْ يَتَحَلَّى بِهَا طَالِبُ العِلْمِ؟", options: ["المُثَابَرَةُ وَالصَّبْرُ", "الكَسَلُ", "التَّسَرُّعُ", "الخَوْفُ"], answer: "المُثَابَرَةُ وَالصَّبْرُ", exp: "طَلَبُ العِلْمِ طَرِيقٌ طَوِيلٌ يَحْتَاجُ إِلَى جِدٍّ وَاجْتِهَادٍ." },
+        { q: "مَا مَعْنَى كَلِمَةِ «يَكْتَسِبُ»؟", options: ["يَحْصُلُ عَلَى", "يَفْقِدُ", "يُبَدِّدُ", "يُعْطِي"], answer: "يَحْصُلُ عَلَى", exp: "يَكْتَسِبُ المَعَارِفَ أَيْ يَحْصُلُ عَلَيْهَا وَيَضُمُّهَا لِرَصِيدِهِ الفِكْرِيِّ." },
+        { q: "مَا مُضَادُّ كَلِمَةِ «يُبَدِّدُ»؟", options: ["يُحَافِظُ عَلَى", "يُضَيِّعُ", "يُهْمِلُ", "يُكَسِّرُ"], answer: "يُحَافِظُ عَلَى", exp: "يُبَدِّدُ تَعْنِي يُضَيِّعُ وَيُفَرِّطُ، وَعَكْسُهَا الحِفَاظُ." },
+        { q: "أَيُّ العِبَارَاتِ التَّالِيَةِ صَحِيحَةٌ عَنْ القِيمَةِ؟", options: ["القِيمَةُ تَعِيشُ مَعَنَا وَتُوَجِّهُ أَفْعَالَنَا", "القِيمَةُ شَيْءٌ نَمْلِكُهُ فِي الخِزَانَةِ", "القِيمَةُ مُجَرَّدُ كَلِمَاتٍ نَحْفَظُهَا", "لَا قِيمَةَ لِلْقِيَمِ"], answer: "القِيمَةُ تَعِيشُ مَعَنَا وَتُوَجِّهُ أَفْعَالَنَا", exp: "القيم هي المبادئ التي نحيا بها وتحدد سلوكنا وتصرفاتنا." },
+        { q: "مَاذَا يَعْنِي «أَثَرُ» العِلْمِ؟", options: ["النَّتِيجَةُ وَالبَصْمَةُ الَّتِي يَتْرُكُهَا", "مَكَانُ الْجُلُوسِ", "الْكِتَابُ المَدْرَسِيُّ", "لَا شَيْءَ"], answer: "النَّتِيجَةُ وَالبَصْمَةُ الَّتِي يَتْرُكُهَا", exp: "أَثَرُ العِلْمِ هُوَ مَا يُغَيِّرُهُ فِي حَيَاةِ الإِنْسَانِ مِنَ تَطَوُّرٍ وَرُقِيٍّ." },
+        { q: "هل المَالُ هُوَ الكَنْزُ الحَقِيقِيُّ؟", options: ["لَا، هُوَ كَنْزٌ زَائِلٌ", "نَعَمْ، هُوَ الأَهَمُّ", "نَعَمْ، لِأَنَّهُ يَشْتَرِي كُلَّ شَيْءٍ", "لَا، لَا فَائِدَةَ لَهُ"], answer: "لَا، هُوَ كَنْزٌ زَائِلٌ", exp: "المَالُ قَدْ يَفْنَى وَيَنْفَدُ، أَمَّا العِلْمُ فَبَاقٍ مَعَ صَاحِبِهِ." },
+        { q: "مَاذا يَعْنِي «الكَنْزُ» فِي سِيَاقِ القِصَّةِ؟", options: ["المَعْرِفَةُ وَالأَخْلَاقُ", "الصُّنْدُوقُ الخَشَبِيُّ", "المَكَانُ البَعِيدُ", "الخَرِيطَةُ"], answer: "المَعْرِفَةُ وَالأَخْلَاقُ", exp: "الدَّرْسُ يُسَمِّي العِلْمَ وَالخُلُقَ بِـ (الْكَنْزِ) لِعَظِيمِ أَهَمِّيَّتِهِمَا." },
+        { q: "مَا نَتِيجَةُ نَشْرِ العِلْمِ بَيْنَ النَّاسِ؟", options: ["تَقَدُّمُ المُجْتَمَعِ وَرُقِيُّهُ", "خُصُومَةُ النَّاسِ", "ضَيَاعُ المَعْلُومَاتِ", "لَا شَيْءَ"], answer: "تَقَدُّمُ المُجْتَمَعِ وَرُقِيُّهُ", exp: "كُلَّمَا انْتَشَرَ العِلْمُ بَيْنَ النَّاسِ، زَادَ رُقِيُّ المُجْتَمَعِ وَنَجَاحُهُ." },
+        { q: "كَيفَ يَكُونُ العِلْمُ سِلَاحًا؟", options: ["عِنْدَمَا نُوَظِّفُهُ لِحَلِّ مُشْكِلَاتِنَا وَتَطْوِيرِ حَيَاتِنَا", "عِنْدَمَا نُحَارِبُ بِهِ", "عِنْدَمَا نَكْتُبُ بِهِ كُتُبًا كَثِيرَةً", "عِنْدَمَا نَبِيعُهُ"], answer: "عِنْدَمَا نُوَظِّفُهُ لِحَلِّ مُشْكِلَاتِنَا وَتَطْوِيرِ حَيَاتِنَا", exp: "العِلْمُ يُمَكِّنُنَا مِنَ التَّغَلُّبِ عَلَى الصِّعَابِ وَتَطْوِيرِ أَدَوَاتِنَا لِلْأَفْضَلِ." },
+        { q: "مَا هُوَ مُضَادُّ كَلِمَةِ «نَفِيسٌ»؟", options: ["زَهِيدٌ (رَخِيصٌ)", "غَالٍ", "عَظِيمٌ", "ثَمِينٌ"], answer: "زَهِيدٌ (رَخِيصٌ)", exp: "عَكْسُ الشَّيْءِ النَّفِيسِ (القَيِّمِ) هُوَ الشَّيْءُ الزَّهِيدُ (الرَّخِيصُ)." },
+        { q: "هَلْ يَحْتَاجُ العِلْمُ إِلَى مَكَانٍ لِتَخْزِينِهِ؟", options: ["لَا، فَهُوَ يَسْكُنُ فِي العَقْلِ وَالقَلْبِ", "نَعَمْ، فِي غُرْفَةٍ كَبِيرَةٍ", "نَعَمْ، فِي خِزَانَةٍ مَعْدِنِيَّةٍ", "نَعَمْ، عَلَى هَاتِفٍ مَحْمُولٍ"], answer: "لَا، فَهُوَ يَسْكُنُ فِي العَقْلِ وَالقَلْبِ", exp: "العِلْمُ كَنْزٌ خَفِيٌّ لَا يَحْتَاجُ إِلَى مَكَانٍ، بَلْ يَحْفَظُهُ العَقْلُ." },
+        { q: "مَاذَا يَجِبُ عَلَى مَنْ يَمْتَلِكُ عِلْمًا أَنْ يَفْعَلَ؟", options: ["أَنْ يُعَلِّمَهُ لِلآخَرِينَ", "أَنْ يَحْتَفِظَ بِهِ لِنَفْسِهِ", "أَنْ يَبِيعَهُ لِمَنْ يَدْفَعُ أَكْثَرَ", "أَنْ يَكْتُبَهُ وَيُغْلِقَ عَلَيْهِ"], answer: "أَنْ يُعَلِّمَهُ لِلآخَرِينَ", exp: "نَشْرُ العِلْمِ يُعْتَبَرُ صَدَقَةً جَارِيَةً وَسَبَبًا لِبَقَاءِ أَثَرِهِ." },
+        { q: "أَيُّ الجُمَلِ الآتِيَةِ تَدُلُّ عَلَى أَهَمِّيَّةِ القِرَاءَةِ؟", options: ["القِرَاءَةُ تُغَذِّي العَقْلَ كَمَا يُغَذِّي الطَّعَامُ الجِسْمَ", "القِرَاءَةُ تَسْتَهْلِكُ الوَقْتَ", "القِرَاءَةُ لِلْأَطْفَالِ فَقَطْ", "لا فَائِدَةَ مِنَ القِرَاءَةِ"], answer: "القِرَاءَةُ تُغَذِّي العَقْلَ كَمَا يُغَذِّي الطَّعَامُ الجِسْمَ", exp: "كَمَا يَحْتَاجُ الجِسْمُ لِلطَّعَامِ لِيَعِيشَ، يَحْتَاجُ العَقْلُ لِلْقِرَاءَةِ لِيَنْضَجَ." },
+        { q: "مَا هُوَ مُفْرَدُ كَلِمَةِ «أَحْجَار»؟", options: ["حَجَرٌ", "حُجْرَةٌ", "حَجَّارٌ", "أُحْجِيَّةٌ"], answer: "حَجَرٌ", exp: "مُفْرَدُ (أَحْجَار) هُوَ (حَجَرٌ)." },
+        { q: "الخُلَاصَةُ مِنَ الدَّرْسِ هِيَ أَنَّ:", options: ["الذَّهَبَ لَا يَنْفَعُ", "العِلْمَ وَالخُلُقَ أَبْقَى مِنْ كُلِّ ثَرْوَةٍ", "السَّفَرَ هُوَ الكَنْزُ", "الْمَلَابِسَ هِيَ الكَنْزُ"], answer: "العِلْمَ وَالخُلُقَ أَبْقَى مِنْ كُلِّ ثَرْوَةٍ", exp: "العِلْمُ وَالخُلُقُ هُمَا الكَنْزُ الحَقِيقِيُّ الَّذِي يَبْقَى وَيَنْفَعُ صَاحِبَهُ وَالْمُجْتَمَعَ." },
+
+        /* صواب أو خطأ */
+        { q: "المَالُ هُوَ الكَنْزُ الوحِيدُ الَّذِي يَجِبُ أَنْ نَسْعَى لِجَمْعِهِ.", options: ["صواب", "خطأ"], answer: "خطأ", exp: "خطأ، العلم والقيم هما الكنز الأبقى." },
+        { q: "كُلَّمَا مَنَحْنَا عِلْمَنَا لِلآخَرِينَ نَقَصَ عِنْدَنَا.", options: ["صواب", "خطأ"], answer: "خطأ", exp: "خطأ، العلم يزداد وينمو بالعطاء." },
+        { q: "العِلْمُ لَا يَحْتَاجُ إِلَى صَبْرٍ وَمُثَابَرَةٍ.", options: ["صواب", "خطأ"], answer: "خطأ", exp: "خطأ، العلم طريق طويل يحتاج لجهد." },
+        { q: "مَعْنَى «نَفِيس» هُوَ رَخِيصٌ.", options: ["صواب", "خطأ"], answer: "خطأ", exp: "خطأ، نَفِيسٌ يَعْنِي ثَمِينًا وَعَظِيمَ القِيمَةِ." },
+        { q: "الكَنْزُ الحَقِيقِيُّ هُوَ الَّذِي يَبْقَى بَعْدَ مَمَاتِ الإِنْسَانِ وَيَنْفَعُ بَعْدَهُ.", options: ["صواب", "خطأ"], answer: "صواب", exp: "صواب، العلم والأثر الطيب لا يموتا بموت الإنسان." },
+        { q: "الشَّخْصُ الَّذِي يَهْتَمُّ بِالقِرَاءَةِ يَكُونُ أَكْثَرَ وعياً مِنَ الَّذِي يَهْمِلُهَا.", options: ["صواب", "خطأ"], answer: "صواب", exp: "صواب، القراءة تطور العقل وتوسع المدارك." },
+        { q: "مُضَادُّ كَلِمَةِ «يُبَدِّدُ» هُوَ «يُحَافِظُ عَلَى».", options: ["صواب", "خطأ"], answer: "صواب", exp: "صواب، يبدد يضيع وعكسها يحافظ على." },
+        { q: "لا يَحْتَاجُ العِلْمُ إِلَى أَيِّ خَزْنَةٍ لِحِفْظِهِ لِأَنَّهُ يَسْكُنُ فِي العَقْلِ.", options: ["صواب", "خطأ"], answer: "صواب", exp: "صواب، هو كنز خفي يحفظه العقل." },
+        { q: "أَثَرُ العِلْمِ يُغَيِّرُ حَيَاةَ الإِنْسَانِ وَيَرْقَى بِهِ.", options: ["صواب", "خطأ"], answer: "صواب", exp: "صواب، العلم يبني الأمم ويطور حياة الأفراد." },
+        { q: "مُفْرَدُ «أَحْجَار» هُوَ «حُجْرَة».", options: ["صواب", "خطأ"], answer: "خطأ", exp: "خطأ، مفرد أحجار هو حجر." }
+    ];
+
+    let currentQ = 0, score = 0, userAnswers = [];
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startQuiz() { currentQ = 0; score = 0; userAnswers = []; showScreen('screen-quiz'); loadQ(); }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function loadQ() {
+        let q = questions[currentQ];
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('progress-bar').style.width = (currentQ/questions.length)*100 + "%";
+        document.getElementById('progress-text').innerText = `السُّؤَالُ ${toArabicNumeral(currentQ + 1)} / ${toArabicNumeral(questions.length)}`;
+        
+        let container = document.getElementById('options-container'); 
+        container.innerHTML = '';
+        document.getElementById('feedback-container').style.display = 'none';
+        
+        let optionsArr = [...q.options];
+        shuffleArray(optionsArr);
+        
+        optionsArr.forEach(opt => {
+            let btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
+            btn.onclick = () => {
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                let isCorrect = (opt === q.answer);
+                if(isCorrect) { score++; btn.classList.add('correct'); document.getElementById('feedback-message').innerText = "إِجَابَةٌ صَحِيحَةٌ ✓"; }
+                else { btn.classList.add('wrong'); document.querySelectorAll('.option-btn').forEach(b => { if(b.innerText === q.answer) b.classList.add('correct'); }); document.getElementById('feedback-message').innerText = "إِجَابَةٌ خَاطِئَةٌ ✗"; }
+                document.getElementById('feedback-explanation').innerText = q.exp;
+                document.getElementById('feedback-container').style.display = 'flex';
+                userAnswers.push({q: q.q, ans: opt, correct: q.answer, isCorrect: isCorrect});
+            };
+            container.appendChild(btn);
+        });
+    }
+    function nextQuestion() { 
+        currentQ++; 
+        if(currentQ < questions.length) loadQ(); 
+        else { 
+            document.getElementById('score-text').innerText = toArabicNumeral(score) + "/٣٠"; 
+            showScreen('screen-result'); 
+        } 
+    }
+    function toArabicNumeral(n) { return n.toString().split('').map(c => '٠١٢٣٤٥٦٧٨٩'[c] || c).join(''); }
+    function restartQuiz() { showScreen('screen-start'); }
+    function showReview() {
+        let list = document.getElementById('review-list'); list.innerHTML = '';
+        userAnswers.forEach((a, i) => {
+            let item = document.createElement('div');
+            item.className = 'review-item';
+            item.innerHTML = `<div class="review-q">${toArabicNumeral(i+1)}. ${a.q}</div>
+            <div class="${a.isCorrect ? 'text-green' : 'text-red'}">إجابتك: ${a.ans} ${a.isCorrect ? '✓' : '✗'}</div>
+            ${!a.isCorrect ? `<div class="text-green">الإجابة الصحيحة: ${a.correct}</div>` : ''}`;
+            list.appendChild(item);
+        });
+        showScreen('screen-review');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اخْتِبَارٌ تَفَاعُلِيّ - اسْمُ الْفَاعِلِ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* Theme colors - Navy Blue and Gold */
+            --primary: #0f172a; /* Slate 900 (Navy) */
+            --secondary: #fbbf24; /* Amber 400 (Gold) */
+            --white: #ffffff;
+            --green: #10b981; /* Emerald 500 */
+            --red: #ef4444; /* Red 500 */
+            --dark-bg: #1e293b; /* Slate 800 */
+            --text-dark: #020617; /* Slate 950 */
+            --black-bg: #020617; /* Very Dark Slate */
+            --accent: #fcd34d; /* Amber 300 */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--black-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #app-container {
+            background-color: var(--primary);
+            color: var(--white);
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 Aspect Ratio */
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 12px;
+            background-image: radial-gradient(circle at top right, rgba(251, 191, 36, 0.15), transparent 60%);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 4vh 5vw;
+            box-sizing: border-box;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .start-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .icon-large {
+            width: 18vh;
+            height: 18vh;
+            margin-bottom: 2vh;
+            stroke: var(--secondary);
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        h1 {
+            font-size: 6.5vh;
+            color: var(--secondary);
+            margin: 0 0 2vh 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 4.5vh;
+            margin-bottom: 6vh;
+            font-weight: bold;
+            line-height: 1.5;
+            color: var(--accent);
+        }
+
+        .btn-large {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 5vh;
+            font-weight: bold;
+            padding: 2vh 6vw;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn-large:active {
+            transform: scale(0.95);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 3vh;
+            font-weight: bold;
+            margin-bottom: 2vh;
+            color: var(--secondary);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 2.5vh;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 4vh;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 5.5vh;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4vh;
+            line-height: 1.5;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vh;
+            margin-bottom: 4vh;
+        }
+
+        .option-btn {
+            background-color: var(--white);
+            color: var(--text-dark);
+            font-size: 4vh;
+            font-weight: bold;
+            padding: 3vh 2vw;
+            border: 5px solid var(--white);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+            line-height: 1.4;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .option-btn.correct {
+            background-color: var(--green);
+            color: var(--white);
+            border-color: var(--green);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        .feedback-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0,0,0,0.5);
+            padding: 2.5vh 3vw;
+            border-radius: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-message {
+            font-size: 4.5vh;
+            font-weight: bold;
+            margin-bottom: 1.5vh;
+        }
+
+        .feedback-explanation {
+            font-size: 3.5vh;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 2.5vh;
+            line-height: 1.5;
+        }
+
+        .btn-next {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 4vh;
+            font-weight: bold;
+            padding: 1.5vh 5vw;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-circle {
+            width: 32vh;
+            height: 32vh;
+            border: 1.5vh solid var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4vh;
+            background-color: rgba(251, 191, 36, 0.1);
+        }
+
+        .score-text {
+            font-size: 8.5vh;
+            font-weight: bold;
+            color: var(--white);
+        }
+
+        .percentage-text {
+            font-size: 4.5vh;
+            color: var(--secondary);
+        }
+
+        .evaluation-text {
+            font-size: 6.5vh;
+            font-weight: bold;
+            margin-bottom: 6vh;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 4vw;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 4px solid var(--secondary);
+            font-size: 4.5vh;
+            font-weight: bold;
+            padding: 2vh 4vw;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3vh;
+            padding-bottom: 2vh;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .review-title {
+            font-size: 5.5vh;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .review-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 2vw;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5vh;
+        }
+
+        .review-list::-webkit-scrollbar { width: 1.2vw; }
+        .review-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .review-list::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+
+        .review-item {
+            background-color: rgba(0,0,0,0.3);
+            padding: 3.5vh;
+            border-radius: 15px;
+            border-right: 1.5vw solid var(--secondary);
+        }
+
+        .review-q {
+            font-size: 4vh;
+            font-weight: bold;
+            margin-bottom: 2vh;
+            line-height: 1.5;
+        }
+
+        .review-ans {
+            font-size: 3.5vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            line-height: 1.4;
+        }
+
+        .text-green { color: var(--green); font-weight: bold;}
+        .text-red { color: var(--red); font-weight: bold;}
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+
+    <div id="screen-start" class="screen active">
+        <div class="start-content">
+            <!-- Icon representing a person/doer (فاعل) -->
+            <svg class="icon-large" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                <circle cx="12" cy="7" r="4" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></circle>
+                <path d="M16 11h6M19 8v6" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+            </svg>
+            <h1>لُغَةٌ عَرَبِيَّةٌ - الصَّفُّ الثَّالِثُ الْإِعْدَادِيُّ</h1>
+            <div class="subtitle">الْقَوَاعِدُ النَّحْوِيَّةُ: اسْمُ الْفَاعِلِ<br> اخْتِبَارٌ تَفَاعُلِيٌّ شَامِلٌ (٣٠ سُؤَالًا)</div>
+            <button class="btn-large" onclick="startQuiz()">اِبْدَأِ الِاخْتِبَارَ</button>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="top-bar">
+            <div id="progress-text">السُّؤَالُ ١ / ٣٠</div>
+            <div id="progress-percent">٠٪</div>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="question-text" class="question-text">نَصُّ السُّؤَالِ يَظْهَرُ هُنَا؟</div>
+
+        <div id="options-container" class="options-grid">
+            <!-- Options dynamically injected -->
+        </div>
+
+        <!-- Feedback Container -->
+        <div id="feedback-container" class="feedback-container">
+            <div id="feedback-message" class="feedback-message"></div>
+            <div id="feedback-explanation" class="feedback-explanation"></div>
+            <button id="btn-next" class="btn-next" onclick="nextQuestion()">السُّؤَالُ التَّالِي</button>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-container">
+            <h1 style="font-size: 7vh; margin-bottom: 4vh;">نَتِيجَةُ الِاخْتِبَارِ</h1>
+            <div class="score-circle">
+                <div id="score-text" class="score-text">٣٠/٣٠</div>
+                <div id="percentage-text" class="percentage-text">١٠٠٪</div>
+            </div>
+            <div id="evaluation-text" class="evaluation-text" style="color: var(--secondary);">مُمْتَازٌ!</div>
+            
+            <div class="result-buttons">
+                <button class="btn-secondary" onclick="showReview()">مُرَاجَعَةُ الإِجَابَاتِ</button>
+                <button class="btn-large" style="font-size: 4.5vh; padding: 2vh 4vw;" onclick="restartQuiz()">إِعَادَةُ الِاخْتِبَارِ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-review" class="screen">
+        <div class="review-header">
+            <h2 class="review-title">مُرَاجَعَةُ الإِجَابَاتِ</h2>
+            <button class="btn-next" onclick="showScreen('screen-result')">عَوْدَةٌ لِلنَّتِيجَةِ</button>
+        </div>
+        <div id="review-list" class="review-list">
+            <!-- Review items injected here -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 30 Questions strictly derived from "اسم الفاعل" section in the presentation
+    const allQuestions = [
+        { 
+            q: "كَيْفَ يُصَاغُ اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ الثُّلَاثِيِّ الصَّحِيحِ مِثْل (صَدَقَ)؟", 
+            options: ["عَلَى وَزْنِ (فَاعِل)", "عَلَى وَزْنِ (مَفْعُول)", "بِإِبْدَالِ حَرْفِ الْمُضَارَعَةِ مِيمًا", "عَلَى وَزْنِ (فَعِيل)"], 
+            answer: "عَلَى وَزْنِ (فَاعِل)", 
+            exp: "يُصَاغُ اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ الثُّلَاثِيِّ الصَّحِيحِ دَائِمًا عَلَى وَزْنِ (فَاعِل)، مِثْل: صَدَقَ ⟵ صَادِق." 
+        },
+        { 
+            q: "مَا هِيَ قَاعِدَةُ صِيَاغَةِ اسْمِ الْفَاعِلِ مِنَ الْفِعْلِ غَيْرِ الثُّلَاثِيِّ؟", 
+            options: ["مِيمٌ مَضْمُومَةٌ وَكَسْرُ مَا قَبْلَ الْآخِرِ", "مِيمٌ مَضْمُومَةٌ وَفَتْحُ مَا قَبْلَ الْآخِرِ", "مِيمٌ مَفْتُوحَةٌ وَسُكُونُ الْآخِرِ", "عَلَى وَزْنِ (فَاعِل) دَائِمًا"], 
+            answer: "مِيمٌ مَضْمُومَةٌ وَكَسْرُ مَا قَبْلَ الْآخِرِ", 
+            exp: "يُصَاغُ مِنْ غَيْرِ الثُّلَاثِيِّ بِالْإِتْيَانِ بِمُضَارِعِهِ، مَعَ إِبْدَالِ حَرْفِ الْمُضَارَعَةِ مِيمًا مَضْمُومَةً، وَكَسْرِ مَا قَبْلَ آخِرِهِ." 
+        },
+        { 
+            q: "مَا اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ الْمُضَعَّفِ «مَدَّ»؟", 
+            options: ["مَادٌّ", "مَامِدٌ", "مَمْدُودٌ", "مُمِدٌّ"], 
+            answer: "مَادٌّ", 
+            exp: "الْفِعْلُ الثُّلَاثِيُّ الْمُضَعَّفُ يُصَاغُ عَلَى وَزْنِ (فَاعِل) مَعَ بَقَاءِ التَّضْعِيفِ كَمَا هُوَ، فَيُصْبِحُ (مَادٌّ)." 
+        },
+        { 
+            q: "فِي الْحَالَاتِ الشَّاذَّةِ، أَيُّ الْكَلِمَاتِ الْآتِيَةِ يَسْتَوِي فِيهَا اسْمُ الْفَاعِلِ مَعَ اسْمِ الْمَفْعُولِ؟", 
+            options: ["مُخْتَارٌ", "مُسْتَفِيدٌ", "صَادِقٌ", "مُطِيعٌ"], 
+            answer: "مُخْتَارٌ", 
+            exp: "الْأَفْعَالُ مِثْل (اخْتَارَ، احْتَلَّ، انْهَارَ) تُخَالِفُ الْقَاعِدَةَ؛ فَيَأْتِي مِنْهَا اسْمُ الْفَاعِلِ بِنَفْسِ شَكْلِ اسْمِ الْمَفْعُولِ (مُخْتَار)." 
+        },
+        { 
+            q: "فِي جُمْلَةِ «اللَّهُ مُخْتَارٌ نَبِيَّهُ»، مَا نَوْعُ الْمُشْتَقِّ فِي كَلِمَةِ «مُخْتَارٌ»؟", 
+            options: ["اسْمُ فَاعِلٍ", "اسْمُ مَفْعُولٍ", "صِيغَةُ مُبَالَغَةٍ", "اسْمُ مَكَانٍ"], 
+            answer: "اسْمُ فَاعِلٍ", 
+            exp: "هُنَا دَلَّتْ كَلِمَةُ «مُخْتَارٌ» عَلَى مَنْ قَامَ بِالْفِعْلِ (اللَّهُ هُوَ الَّذِي اخْتَارَ)، لِذَا فَهِيَ هُنَا (اسْمُ فَاعِلٍ)." 
+        },
+        { 
+            q: "فِي جُمْلَةِ «النَّبِيُّ مُخْتَارٌ مِنَ اللَّهِ»، مَا نَوْعُ الْمُشْتَقِّ فِي كَلِمَةِ «مُخْتَارٌ»؟", 
+            options: ["اسْمُ مَفْعُولٍ", "اسْمُ فَاعِلٍ", "اسْمُ زَمَانٍ", "صِفَةٌ مُشَبَّهَةٌ"], 
+            answer: "اسْمُ مَفْعُولٍ", 
+            exp: "هُنَا دَلَّتْ كَلِمَةُ «مُخْتَارٌ» عَلَى مَنْ وَقَعَ عَلَيْهِ الِاخْتِيَارُ (النَّبِيُّ)، فَهِيَ فِي هَذَا السِّيَاقِ (اسْمُ مَفْعُولٍ)." 
+        },
+        { 
+            q: "مَا فِعْلُ اسْمِ الْفَاعِلِ «الْمُؤْمِنُ» الَّذِي وَرَدَ فِي أَمْثِلَةِ الدَّرْسِ؟", 
+            options: ["آمَنَ", "أَمِنَ", "يَأْمَنُ", "اسْتَأْمَنَ"], 
+            answer: "آمَنَ", 
+            exp: "اسْمُ الْفَاعِلِ «الْمُؤْمِنُ» صِيغَ مِنَ الْفِعْلِ الرُّبَاعِيِّ (آمَنَ)، حَيْثُ نَأْتِي بِالْمُضَارِعِ (يُؤْمِنُ) ثُمَّ الْمِيمِ الْمَضْمُومَةِ مَعَ كَسْرِ مَا قَبْلَ الْآخِرِ." 
+        },
+        { 
+            q: "اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ الرُّبَاعِيِّ «أَطَاعَ» هُوَ:", 
+            options: ["مُطِيعٌ", "طَائِعٌ", "مُطَاعٌ", "مُطَوِّعٌ"], 
+            answer: "مُطِيعٌ", 
+            exp: "نَأْتِي بِالْمُضَارِعِ (يُطِيعُ)، نُبْدِلُ حَرْفَ الْمُضَارَعَةِ مِيمًا مَضْمُومَةً، فَيُصْبِحُ (مُطِيعٌ)." 
+        },
+        { 
+            q: "مَا فِعْلُ اسْمِ الْفَاعِلِ «الْبَائِحُ» كَمَا فِي جُمْلَةِ «الْبَائِحُ بِسِرِّهِ نَادِمٌ»؟", 
+            options: ["بَاحَ", "أَبَاحَ", "يُبِيحُ", "اسْتَبَاحَ"], 
+            answer: "بَاحَ", 
+            exp: "اسْمُ الْفَاعِلِ «بَائِحٌ» عَلَى وَزْنِ (فَاعِل)، فِعْلُهُ الثُّلَاثِيُّ الْأَجْوَفُ (بَاحَ)، وُقُلِبَتْ أَلِفُهُ هَمْزَةً." 
+        },
+        { 
+            q: "«اسْتَعَرْتُ مِنْ صَدِيقٍ كِتَابًا». مَا اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ «اسْتَعَارَ»؟", 
+            options: ["مُسْتَعِيرٌ", "مُسْتَعَارٌ", "مُعِيرٌ", "عَائِرٌ"], 
+            answer: "مُسْتَعِيرٌ", 
+            exp: "«اسْتَعَارَ» فِعْلٌ سُدَاسِيٌّ، مُضَارِعُهُ (يَسْتَعِيرُ)، نُبْدِلُ الْيَاءَ مِيمًا مَضْمُومَةً مَعَ بَقَاءِ كَسْرَةِ مَا قَبْلَ الْآخِرِ (مُسْتَعِيرٌ)." 
+        },
+        { 
+            q: "مَا فِعْلُ اسْمِ الْفَاعِلِ «مُسْتَفِيدٌ» فِي عِبَارَةِ «أَنَا مُسْتَفِيدٌ مِنْ نَصَائِحِ الْكِبَارِ»؟", 
+            options: ["اسْتَفَادَ", "أَفَادَ", "فَادَ", "تَفَايَدَ"], 
+            answer: "اسْتَفَادَ", 
+            exp: "«مُسْتَفِيدٌ» مَبْدُوءٌ بِمِيمٍ مَضْمُومَةٍ وَمَكْسُورٌ مَا قَبْلَ آخِرِهِ، وَهُوَ مَأْخُوذٌ مِنَ الْفِعْلِ السُّدَاسِيِّ (اسْتَفَادَ)." 
+        },
+        { 
+            q: "حَدِّدِ اسْمَ الْفَاعِلِ فِي جُمْلَةِ «لَا تَكُنْ عَائِبًا مُسِيئًا لِغَيْرِكَ»:", 
+            options: ["عَائِبًا وَمُسِيئًا", "عَائِبًا فَقَطْ", "مُسِيئًا فَقَطْ", "تَكُنْ"], 
+            answer: "عَائِبًا وَمُسِيئًا", 
+            exp: "«عَائِبًا» اسْمُ فَاعِلٍ مِنْ (عَابَ)، وَ«مُسِيئًا» اسْمُ فَاعِلٍ مِنْ (أَسَاءَ). كِلَاهُمَا اسْمُ فَاعِلٍ." 
+        },
+        { 
+            q: "مَا فِعْلُ اسْمِ الْفَاعِلِ «مُطْمَئِنًّا» فِي جُمْلَةِ «الرَّاضِي بِمَا قَسَمَهُ اللَّهُ يَعِيشُ مُطْمَئِنًّا»؟", 
+            options: ["اطْمَأَنَّ", "طَمْأَنَ", "تَطَامَنَ", "طَمَّنَ"], 
+            answer: "اطْمَأَنَّ", 
+            exp: "«مُطْمَئِنّ» مِيمُهُ مَضْمُومَةٌ، وَمَا قَبْلَ آخِرِهِ مَكْسُورٌ، فِعْلُهُ الْمَاضِي (اطْمَأَنَّ)." 
+        },
+        { 
+            q: "مَا إِعْرَابُ كَلِمَةِ «مُتَكَبِّرًا» فِي جُمْلَةِ «يَا بُنَيَّ لَا تَكُنْ مُتَكَبِّرًا»؟", 
+            options: ["خَبَرُ (تَكُنْ) مَنْصُوبٌ", "حَالٌ مَنْصُوبَةٌ", "نَعْتٌ مَنْصُوبٌ", "مَفْعُولٌ بِهِ مَنْصُوبٌ"], 
+            answer: "خَبَرُ (تَكُنْ) مَنْصُوبٌ", 
+            exp: "كَمَا جَاءَ فِي الشَّرْحِ، اسْمُ الْفَاعِلِ يُعْرَبُ حَسَبَ مَوْقِعِهِ؛ هُنَا وَقَعَ خَبَرًا لِلْفِعْلِ النَّاقِصِ (تَكُنْ) مَنْصُوبًا بِالْفَتْحَةِ." 
+        },
+        { 
+            q: "مَا إِعْرَابُ «النَّاصِحُونَ» فِي جُمْلَةِ «يُعْجِبُنِي الْأَصْدِقَاءُ النَّاصِحُونَ»؟", 
+            options: ["نَعْتٌ مَرْفُوعٌ بِالْوَاوِ", "فَاعِلٌ مَرْفُوعٌ بِالْوَاوِ", "خَبَرٌ مَرْفُوعٌ بِالْوَاوِ", "بَدَلٌ مَرْفُوعٌ بِالْوَاوِ"], 
+            answer: "نَعْتٌ مَرْفُوعٌ بِالْوَاوِ", 
+            exp: "صِفَةٌ لِلْأَصْدِقَاءِ؛ لِذَا فَهِيَ (نَعْتٌ)، وَلِأَنَّهَا جَمْعُ مُذَكَّرٍ سَالِمٌ رُفِعَتْ بِالْوَاوِ." 
+        },
+        { 
+            q: "حَدِّدْ اسْمَ الْفَاعِلِ فِي جُمْلَةِ «الْمُنَافِسَةُ الشَّرِيفَةُ سُلُوكٌ مَحْمُودٌ يُمَيِّزُ كُلَّ مُحَافِظٍ عَلَى الْقِيَمِ»:", 
+            options: ["مُحَافِظٍ", "الْمُنَافِسَةُ", "مَحْمُودٌ", "الشَّرِيفَةُ"], 
+            answer: "مُحَافِظٍ", 
+            exp: "«مُحَافِظٍ» مَبْدُوءٌ بِمِيمٍ مَضْمُومَةٍ وَمَكْسُورُ مَا قَبْلَ الْآخِرِ، مِنْ فِعْلِ (حَافَظَ)." 
+        },
+        { 
+            q: "«ذُو الْخُلُقِ يَتَقَبَّلُ الْآخَرِينَ»، عِنْدَ تَحْوِيلِ الْفِعْلِ «يَتَقَبَّلُ» إِلَى اسْمِ فَاعِلٍ يُصْبِحُ:", 
+            options: ["مُتَقَبِّلٌ", "قَابِلٌ", "مَقْبُولٌ", "مُسْتَقْبِلٌ"], 
+            answer: "مُتَقَبِّلٌ", 
+            exp: "الْفِعْلُ (يَتَقَبَّلُ) خُمَاسِيٌّ؛ نُبْدِلُ الْيَاءَ مِيمًا مَضْمُومَةً وَنَكْسِرُ حَرْفَ الْبَاءِ فَيُصْبِحُ (مُتَقَبِّلٌ)." 
+        },
+        { 
+            q: "هَلْ يُثَنَّى اسْمُ الْفَاعِلِ وَيُجْمَعُ وَيُؤَنَّثُ كَمَا وَرَدَ فِي الْقَاعِدَةِ؟", 
+            options: ["نَعَمْ، يَلْحَقُهُ التَّأْنِيثُ وَالتَّثْنِيَةُ وَالْجَمْعُ", "لَا، يَأْتِي مُفْرَدًا مُذَكَّرًا دَائِمًا", "يُؤَنَّثُ فَقَطْ وَلَا يُجْمَعُ", "يُجْمَعُ فَقَطْ وَلَا يُثَنَّى"], 
+            answer: "نَعَمْ، يَلْحَقُهُ التَّأْنِيثُ وَالتَّثْنِيَةُ وَالْجَمْعُ", 
+            exp: "اسْمُ الْفَاعِلِ يَجُوزُ فِيهِ التَّذْكِيرُ وَالتَّأْنِيثُ، وَيَأْتِي مُفْرَدًا وَمُثَنًّى وَجَمْعًا (مِثْل: قَاضِيَة، صَادِقَان، نَاصِحُونَ)." 
+        },
+        { 
+            q: "مَا اسْمُ الْفَاعِلِ مِنْ فِعْلٍ ثُلَاثِيٍّ أَجْوَفَ (مُعْتَلِّ الْوَسَطِ) مِثْل (صَامَ)؟", 
+            options: ["صَائِمٌ", "صَوَّامٌ", "مَصُومٌ", "مُصَامٌ"], 
+            answer: "صَائِمٌ", 
+            exp: "الْفِعْلُ الثُّلَاثِيُّ الْأَجْوَفُ تُقْلَبُ أَلِفُهُ إِلَى هَمْزَةٍ عِنْدَ صِيَاغَةِ اسْمِ الْفَاعِلِ، مِثْل: (صَامَ ⟵ صَائِم)." 
+        },
+        { 
+            q: "اسْتَخْرِجْ اسْمَ فَاعِلٍ جُمِعَ جَمْعَ تَكْسِيرٍ مِنْ جُمْلَةِ «رَأَيْتُ قُضَاةً عَادِلِينَ»:", 
+            options: ["قُضَاةً", "عَادِلِينَ", "رَأَيْتُ", "لَا يُوجَدُ جَمْعُ تَكْسِيرٍ هُنَا"], 
+            answer: "قُضَاةً", 
+            exp: "كَلِمَةُ «قُضَاة» هِيَ جَمْعُ تَكْسِيرٍ لِمُفْرَدِهَا «قَاضٍ»، وَهِيَ اسْمُ فَاعِلٍ." 
+        },
+        { 
+            q: "مَا الْفِعْلُ الَّذِي يُصَاغُ مِنْهُ اسْمُ الْفَاعِلِ «الرَّاضِي»؟", 
+            options: ["رَضِيَ", "رَضَى", "تَرَاضَى", "أَرْضَى"], 
+            answer: "رَضِيَ", 
+            exp: "اسْمُ الْفَاعِلِ «الرَّاضِي» جَاءَ عَلَى وَزْنِ (الْفَاعِل)، وَفِعْلُهُ الثُّلَاثِيُّ النَّاقِصُ هُوَ (رَضِيَ)." 
+        },
+        { 
+            q: "مَا وَزْنُ اسْمِ الْفَاعِلِ كَلِمَة «مُسْتَفِيدٌ»؟", 
+            options: ["مُسْتَفْعِلٌ", "مُسْتَفِعْلٌ", "مُفْتَعِلٌ", "مُفْعِيلٌ"], 
+            answer: "مُسْتَفْعِلٌ", 
+            exp: "«مُسْتَفِيد» مَأْخُوذَةٌ مِنْ (اسْتَفَادَ/يَسْتَفِيدُ)، فَتَكُونُ عَلَى وَزْنِ (مُسْتَفْعِل)." 
+        },
+        { 
+            q: "مَا وَزْنُ اسْمِ الْفَاعِلِ «بَاذِلًا»؟", 
+            options: ["فَاعِلًا", "فَعِيلًا", "مَفْعُولًا", "مُفْعِلًا"], 
+            answer: "فَاعِلًا", 
+            exp: "الْكَلِمَةُ مِنْ (بَذَلَ)، فَوَزْنُهَا هُوَ وَزْنُ (فَاعِل) مَعَ إِضَافَةِ تَنْوِينِ النَّصْبِ فَتُصْبِحُ (فَاعِلًا)." 
+        },
+        { 
+            q: "مَا اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ (احْتَلَّ) الَّذِي يَخْرُجُ عَنِ الْقَاعِدَةِ؟", 
+            options: ["مُحْتَلٌّ", "مُحْتَلِلٌ", "حَالٌّ", "مُسْتَحِلٌّ"], 
+            answer: "مُحْتَلٌّ", 
+            exp: "الْأَفْعَالُ الْخُمَاسِيَّةُ الْمُضَعَّفَةُ مِثْل (احْتَلَّ، امْتَدَّ) يَتَسَاوَى فِيهَا صِيغَةُ اسْمِ الْفَاعِلِ وَاسْمِ الْمَفْعُولِ وَتَكُونُ (مُحْتَلّ)." 
+        },
+        { 
+            q: "مَا اسْمُ الْفَاعِلِ مِنَ الْفِعْلِ (انْشَقَّ) حَسَبَ الْحَالَاتِ الشَّاذَّةِ؟", 
+            options: ["مُنْشَقٌّ", "شَاقٌّ", "مُنْشَقِقٌ", "مَشْقُوقٌ"], 
+            answer: "مُنْشَقٌّ", 
+            exp: "مِثْلُ سَابِقِهِ، الْفِعْلُ (انْشَقَّ) يَأْتِي اسْمُ الْفَاعِلِ مِنْهُ عَلَى صُورَةِ (مُنْشَقّ) لَا تُكْسَرُ فِيهِ الْقَافُ." 
+        },
+        { 
+            q: "كَيْفَ نُفَرِّقُ بَيْنَ اسْمِ الْفَاعِلِ وَاسْمِ الْمَفْعُولِ فِي الْكَلِمَاتِ الشَّاذَّةِ مِثْل (مُخْتَار)؟", 
+            options: ["مِنْ خِلَالِ سِيَاقِ الْجُمْلَةِ وَمَعْنَاهَا", "مِنْ خِلَالِ التَّشْكِيلِ الظَّاهِرِ فَقَطْ", "اسْمُ الْفَاعِلِ دَائِمًا مَرْفُوعٌ", "لَا يُوجَدُ فَرْقٌ إِطْلَاقًا"], 
+            answer: "مِنْ خِلَالِ سِيَاقِ الْجُمْلَةِ وَمَعْنَاهَا", 
+            exp: "بِمَا أَنَّ الصِّيغَةَ وَاحِدَةٌ، نَحْتَكِمُ إِلَى مَعْنَى الْجُمْلَةِ؛ هَلْ دَلَّتْ عَلَى مَنْ قَامَ بِالْفِعْلِ أَمْ مَنْ وَقَعَ عَلَيْهِ الْفِعْلُ." 
+        },
+        { 
+            q: "مَا إِعْرَابُ كَلِمَةِ «مُفْلِحٌ» فِي جُمْلَةِ «الْمُقَدِّرُ لِقِيمَةِ الْوَقْتِ مُفْلِحٌ»؟", 
+            options: ["خَبَرٌ مَرْفُوعٌ بِالضَّمَّةِ", "نَعْتٌ مَرْفُوعٌ بِالضَّمَّةِ", "فَاعِلٌ مَرْفُوعٌ بِالضَّمَّةِ", "مُبْتَدَأٌ مَرْفُوعٌ بِالضَّمَّةِ"], 
+            answer: "خَبَرٌ مَرْفُوعٌ بِالضَّمَّةِ", 
+            exp: "اسْمُ الْفَاعِلِ (الْمُقَدِّرُ) مُبْتَدَأٌ، وَيُخْبِرُ عَنْهُ بِكَلِمَةِ (مُفْلِحٌ) الَّتِي تَقَعُ خَبَرًا مَرْفُوعًا بِالضَّمَّةِ." 
+        },
+        { 
+            q: "فِي جُمْلَةِ «الْفَطِنُ مُتَعَلِّمٌ مِنْ أَخْطَائِهِ»، مَا فِعْلُ اسْمِ الْفَاعِلِ «مُتَعَلِّمٌ»؟", 
+            options: ["تَعَلَّمَ", "عَلِمَ", "أَعْلَمَ", "اسْتَعْلَمَ"], 
+            answer: "تَعَلَّمَ", 
+            exp: "«مُتَعَلِّمٌ» صِيغَتْ مِنْ فِعْلٍ خُمَاسِيٍّ (تَعَلَّمَ - يَتَعَلَّمُ - مُتَعَلِّمٌ)." 
+        },
+        { 
+            q: "حَدِّدِ اسْمَ الْفَاعِلِ مِنَ الْفِعْلِ «عَابَ»:", 
+            options: ["عَائِبٌ", "مَعِيبٌ", "مُعَابٌ", "عَيَّابٌ"], 
+            answer: "عَائِبٌ", 
+            exp: "لِأَنَّهُ ثُلَاثِيٌّ أَجْوَفُ، تُقْلَبُ أَلِفُهُ هَمْزَةً لِيُصْبِحَ عَلَى وَزْنِ فَاعِل: (عَائِب)." 
+        },
+        { 
+            q: "«أَنَا مُسْتَفِيدٌ مِنْ نَصَائِحِ الْكِبَارِ». مَا نَوْعُ الْفِعْلِ الَّذِي صِيغَ مِنْهُ اسْمُ الْفَاعِلِ هُنَا؟", 
+            options: ["فِعْلٌ سُدَاسِيٌّ (اسْتَفَادَ)", "فِعْلٌ خُمَاسِيٌّ (تَفَايَدَ)", "فِعْلٌ رُبَاعِيٌّ (أَفَادَ)", "فِعْلٌ ثُلَاثِيٌّ (فَادَ)"], 
+            answer: "فِعْلٌ سُدَاسِيٌّ (اسْتَفَادَ)", 
+            exp: "الْكَلِمَةُ «مُسْتَفِيدٌ» نَاتِجَةٌ عَنْ إِبْدَالِ حَرْفِ مُضَارَعَةِ الْفِعْلِ السُّدَاسِيِّ (يَسْتَفِيدُ) مِيمًا مَضْمُومَةً مَعَ بَقَاءِ الْكَسْرِ." 
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswersData = [];
+
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function toArabicNumeral(n) {
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return n.toString().split('').map(char => arabicNumbers[char] || char).join('');
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswersData = [];
+        showScreen('screen-quiz');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const questionData = allQuestions[currentQuestionIndex];
+        
+        const percent = ((currentQuestionIndex) / allQuestions.length) * 100;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-text').innerText = `السُّؤَالُ ${toArabicNumeral(currentQuestionIndex + 1)} / ${toArabicNumeral(allQuestions.length)}`;
+
+        document.getElementById('question-text').innerText = questionData.q;
+
+        document.getElementById('feedback-container').style.display = 'none';
+
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        
+        let shuffledOptions = [...questionData.options];
+        
+        if (shuffledOptions.length > 2) {
+            shuffleArray(shuffledOptions);
+        }
+
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(btn, opt, questionData);
+            optionsContainer.appendChild(btn);
+        });
+
+        const nextBtn = document.getElementById('btn-next');
+        if (currentQuestionIndex === allQuestions.length - 1) {
+            nextBtn.innerText = "إِنْهَاءُ الِاخْتِبَارِ";
+        } else {
+            nextBtn.innerText = "السُّؤَالُ التَّالِي";
+        }
+    }
+
+    function selectOption(selectedBtn, selectedText, questionData) {
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(btn => btn.disabled = true);
+
+        const isCorrect = (selectedText === questionData.answer);
+        
+        userAnswersData.push({
+            q: questionData.q,
+            userAns: selectedText,
+            correctAns: questionData.answer,
+            isCorrect: isCorrect
+        });
+
+        if (isCorrect) {
+            score++;
+            selectedBtn.classList.add('correct');
+            showFeedback(true, questionData.exp);
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(btn => {
+                if (btn.innerText === questionData.answer) {
+                    btn.classList.add('correct');
+                }
+            });
+            showFeedback(false, questionData.exp);
+        }
+    }
+
+    function showFeedback(isCorrect, explanation) {
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-explanation');
+
+        feedbackContainer.style.display = 'flex';
+        
+        if (isCorrect) {
+            feedbackMessage.innerText = "إِجَابَةٌ صَحِيحَةٌ ✓";
+            feedbackMessage.style.color = "var(--green)";
+        } else {
+            feedbackMessage.innerText = "إِجَابَةٌ خَاطِئَةٌ ✗";
+            feedbackMessage.style.color = "var(--red)";
+        }
+        
+        feedbackExp.innerText = explanation;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < allQuestions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('progress-bar').style.width = '100%';
+        
+        const percentage = Math.round((score / allQuestions.length) * 100);
+        document.getElementById('score-text').innerText = `${toArabicNumeral(score)}/${toArabicNumeral(allQuestions.length)}`;
+        document.getElementById('percentage-text').innerText = `${toArabicNumeral(percentage)}٪`;
+
+        const evalText = document.getElementById('evaluation-text');
+        if (percentage >= 90) {
+            evalText.innerText = "مُمْتَازٌ! أَنْتَ نَابِغَةٌ فِي اسْتِخْرَاجِ اسْمِ الْفَاعِلِ.";
+            evalText.style.color = "var(--green)";
+        } else if (percentage >= 80) {
+            evalText.innerText = "جَيِّدٌ جِدًّا، مُسْتَوَاكَ مُتَمَيِّزٌ بِقَوَاعِدِ الْمُشْتَقَّاتِ.";
+            evalText.style.color = "var(--green)";
+        } else if (percentage >= 60) {
+            evalText.innerText = "جَيِّدٌ، وَلَكِنْ رَاجِعْ حَالَاتِ اسْمِ الْفَاعِلِ الشَّاذَّةَ مَرَّةً أُخْرَى.";
+            evalText.style.color = "var(--secondary)";
+        } else {
+            evalText.innerText = "تَحْتَاجُ إِلَى قِرَاءَةِ دَرْسِ (اسْمِ الْفَاعِلِ) بِتَرَوٍّ مَرَّةً أُخْرَى.";
+            evalText.style.color = "var(--red)";
+        }
+
+        showScreen('screen-result');
+    }
+
+    function showReview() {
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
+
+        userAnswersData.forEach((item, index) => {
+            const reviewItem = document.createElement('div');
+            reviewItem.className = 'review-item';
+            
+            let ansHtml = '';
+            if (item.isCorrect) {
+                ansHtml = `<div class="text-green">إِجَابَتُكَ: ${item.userAns} ✓</div>`;
+            } else {
+                ansHtml = `
+                    <div class="text-red">إِجَابَتُكَ: ${item.userAns} ✗</div>
+                    <div class="text-green">الإِجَابَةُ الصَّحِيحَةُ: ${item.correctAns}</div>
+                `;
+            }
+
+            reviewItem.innerHTML = `
+                <div class="review-q">${toArabicNumeral(index + 1)}. ${item.q}</div>
+                <div class="review-ans">${ansHtml}</div>
+            `;
+            reviewList.appendChild(reviewItem);
+        });
+
+        showScreen('screen-review');
+    }
+
+    function restartQuiz() {
+        showScreen('screen-start');
+    }
+
+</script>
+</body>
+</html>
